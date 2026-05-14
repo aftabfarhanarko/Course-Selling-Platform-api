@@ -19,15 +19,26 @@ export class UsersService {
   // USER CREATION
   // ===========================================================================
 
-  async create(createUserDto: CreateUserDto, file?: any, req?: express.Request): Promise<User> {
+  async create(createUserDto: CreateUserDto, files?: any, req?: express.Request): Promise<User> {
     const existingUser = await this.findByEmail(createUserDto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
     let photoUrl = createUserDto.photo;
-    if (file && req) {
-      photoUrl = this.mediaService.getUploadUrl(file.filename, req);
+    let nidFrontUrl = createUserDto.nidFrontSide;
+    let nidBackUrl = createUserDto.nidBackSide;
+
+    if (files && req) {
+      if (files.image && files.image[0]) {
+        photoUrl = this.mediaService.getUploadUrl(files.image[0].filename, req);
+      }
+      if (files.nidFrontSide && files.nidFrontSide[0]) {
+        nidFrontUrl = this.mediaService.getUploadUrl(files.nidFrontSide[0].filename, req);
+      }
+      if (files.nidBackSide && files.nidBackSide[0]) {
+        nidBackUrl = this.mediaService.getUploadUrl(files.nidBackSide[0].filename, req);
+      }
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -35,13 +46,23 @@ export class UsersService {
       ...createUserDto,
       password: hashedPassword,
       photo: photoUrl,
+      nidFrontSide: nidFrontUrl,
+      nidBackSide: nidBackUrl,
     });
     return this.usersRepository.save(user);
   }
 
-  async update(id: number, updateUserDto: any, file?: any, req?: express.Request): Promise<User> {
-    if (file && req) {
-      updateUserDto.photo = this.mediaService.getUploadUrl(file.filename, req);
+  async update(id: number, updateUserDto: any, files?: any, req?: express.Request): Promise<User> {
+    if (files && req) {
+      if (files.image && files.image[0]) {
+        updateUserDto.photo = this.mediaService.getUploadUrl(files.image[0].filename, req);
+      }
+      if (files.nidFrontSide && files.nidFrontSide[0]) {
+        updateUserDto.nidFrontSide = this.mediaService.getUploadUrl(files.nidFrontSide[0].filename, req);
+      }
+      if (files.nidBackSide && files.nidBackSide[0]) {
+        updateUserDto.nidBackSide = this.mediaService.getUploadUrl(files.nidBackSide[0].filename, req);
+      }
     }
     
     await this.usersRepository.update(id, updateUserDto);

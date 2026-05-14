@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { EnrollmentStatus } from '../enrollment/entities/enrollment.entity';
 import * as express from 'express';
 import { MediaService } from '../media/media.service';
 
@@ -40,7 +41,13 @@ export class CourseService {
 
     const query = this.courseRepository.createQueryBuilder('course')
       .leftJoinAndSelect('course.category', 'category')
-      .leftJoinAndSelect('course.instructor', 'instructor');
+      .leftJoinAndSelect('course.instructor', 'instructor')
+      .loadRelationCountAndMap(
+        'course.enrollmentCount',
+        'course.enrollments',
+        'enrollment',
+        (qb) => qb.where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+      );
 
     if (search) {
       query.where('course.title ILIKE :search OR course.description ILIKE :search', {
@@ -74,10 +81,17 @@ export class CourseService {
   }
 
   async findOne(id: number): Promise<Course> {
-    const course = await this.courseRepository.findOne({
-      where: { id },
-      relations: ['category', 'instructor'],
-    });
+    const course = await this.courseRepository.createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category')
+      .leftJoinAndSelect('course.instructor', 'instructor')
+      .loadRelationCountAndMap(
+        'course.enrollmentCount',
+        'course.enrollments',
+        'enrollment',
+        (qb) => qb.where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+      )
+      .where('course.id = :id', { id })
+      .getOne();
     if (!course) {
       throw new NotFoundException('Course not found');
     }

@@ -11,6 +11,7 @@ import { CourseModule } from './course/course.module';
 import { CategoryModule } from './category/category.module';
 import { InstructorModule } from './instructor/instructor.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
+import { PaymentmethodModule } from './paymentmethod/paymentmethod.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
     CategoryModule,
     InstructorModule,
     EnrollmentModule,
+    PaymentmethodModule,
   ],
   controllers: [AppController],
   providers: [AppService],

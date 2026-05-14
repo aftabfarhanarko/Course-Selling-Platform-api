@@ -32,4 +32,20 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   photo?: string;
+
+  @IsString()
+  @IsOptional()
+  telegram?: string;
+
+  @IsString()
+  @IsOptional()
+  whatsapp?: string;
+
+  @IsString()
+  @IsOptional()
+  nidFrontSide?: string;
+
+  @IsString()
+  @IsOptional()
+  nidBackSide?: string;
 }

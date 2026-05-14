@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, OneToMany } from 'typeorm';
+import { PaymentMethod } from '../../paymentmethod/entities/paymentmethod.entity';
 
 export enum UserRole {
   STUDENT = 'student',
@@ -56,9 +57,24 @@ export class User {
   @Column({ type: 'text', nullable: true })
   banReason: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  telegram: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  whatsapp: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  nidFrontSide: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  nidBackSide: string | null;
+
   @DeleteDateColumn()
   deletedAt: Date;
 
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => PaymentMethod, (paymentMethod) => paymentMethod.user)
+  paymentMethods: PaymentMethod[];
 }

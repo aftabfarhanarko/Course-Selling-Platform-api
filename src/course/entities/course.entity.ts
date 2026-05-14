@@ -6,9 +6,11 @@ import {
   ManyToOne,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
 import { User } from '../../users/entities/user.entity';
+import { Enrollment } from '../../enrollment/entities/enrollment.entity';
 
 @Entity('course_list')
 export class Course {
@@ -47,6 +49,9 @@ export class Course {
 
   @Column({ type: 'jsonb', nullable: true })
   metadata: any;
+
+  @OneToMany(() => Enrollment, (enrollment) => enrollment.course)
+  enrollments: Enrollment[];
 
   @DeleteDateColumn()
   deletedAt: Date;

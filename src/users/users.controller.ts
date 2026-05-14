@@ -10,9 +10,9 @@ import {
   UseGuards,
   Request,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import * as express from 'express';
@@ -29,23 +29,30 @@ export class UsersController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          callback(null, `${uniqueSuffix}${ext}`);
-        },
-      }),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'image', maxCount: 1 },
+        { name: 'nidFrontSide', maxCount: 1 },
+        { name: 'nidBackSide', maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: './uploads',
+          filename: (req, file, callback) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const ext = extname(file.originalname);
+            callback(null, `${uniqueSuffix}${ext}`);
+          },
+        }),
+      },
+    ),
   )
   create(
     @Body() createUserDto: CreateUserDto,
-    @UploadedFile() file: any,
+    @UploadedFiles() files: { image?: Express.Multer.File[]; nidFrontSide?: Express.Multer.File[]; nidBackSide?: Express.Multer.File[] },
     @Request() req: express.Request,
   ) {
-    return this.usersService.create(createUserDto, file, req);
+    return this.usersService.create(createUserDto, files, req);
   }
 
   @Get()
@@ -65,23 +72,30 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          callback(null, `${uniqueSuffix}${ext}`);
-        },
-      }),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'image', maxCount: 1 },
+        { name: 'nidFrontSide', maxCount: 1 },
+        { name: 'nidBackSide', maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: './uploads',
+          filename: (req, file, callback) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const ext = extname(file.originalname);
+            callback(null, `${uniqueSuffix}${ext}`);
+          },
+        }),
+      },
+    ),
   )
   updateProfile(
     @Request() req: any, 
     @Body() updateData: any,
-    @UploadedFile() file: any,
+    @UploadedFiles() files: { image?: Express.Multer.File[]; nidFrontSide?: Express.Multer.File[]; nidBackSide?: Express.Multer.File[] },
   ) {
-    return this.usersService.update(req.user.id, updateData, file, req);
+    return this.usersService.update(req.user.id, updateData, files, req);
   }
 
   // ===========================================================================
