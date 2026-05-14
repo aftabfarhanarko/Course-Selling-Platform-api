@@ -27,6 +27,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen(5000);
+  const port = 5001;
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();

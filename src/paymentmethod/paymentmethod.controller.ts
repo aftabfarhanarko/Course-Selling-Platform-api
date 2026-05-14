@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { PaymentmethodService } from './paymentmethod.service';
 import { CreatePaymentmethodDto } from './dto/create-paymentmethod.dto';
@@ -27,9 +28,42 @@ export class PaymentmethodController {
     return this.paymentmethodService.create(createPaymentmethodDto, req.user);
   }
 
+  @Get('my')
+  findMyMethods(
+    @Request() req: any,
+    @Query('search') search?: string,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.paymentmethodService.findAll(req.user, {
+      search,
+      type,
+      status,
+      page,
+      limit,
+    });
+  }
+
   @Get()
-  findAll(@Request() req: any) {
-    return this.paymentmethodService.findAll(req.user);
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  findAll(
+    @Request() req: any,
+    @Query('search') search?: string,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.paymentmethodService.findAll(req.user, {
+      search,
+      type,
+      status,
+      page,
+      limit,
+    });
   }
 
   @Get(':id')

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Brackets } from 'typeorm';
 import { CreatePaymentmethodDto } from './dto/create-paymentmethod.dto';
 import { UpdatePaymentmethodDto } from './dto/update-paymentmethod.dto';
 import { PaymentMethod, PaymentMethodStatus } from './entities/paymentmethod.entity';
@@ -31,15 +31,69 @@ export class PaymentmethodService {
     return await this.paymentMethodRepository.save(paymentMethod);
   }
 
-  async findAll(user: User) {
+  async findAll(
+    user: User,
+    options: {
+      search?: string;
+      type?: string;
+      status?: string;
+      page?: number;
+      limit?: number;
+    },
+  ) {
+    const { search, type, status, page = 1, limit = 10 } = options;
+    const skip = (page - 1) * limit;
+
+    const query = this.paymentMethodRepository.createQueryBuilder('pm');
+
+    // Add relations
     if (user.role === UserRole.ADMIN) {
-      return await this.paymentMethodRepository.find({
-        relations: ['user'],
-      });
+      query.leftJoinAndSelect('pm.user', 'user');
+    } else {
+      query.where('pm.user.id = :userId', { userId: user.id });
     }
-    return await this.paymentMethodRepository.find({
-      where: { user: { id: user.id } },
-    });
+
+    // Search filter
+    if (search) {
+      query.andWhere(
+        new Brackets((qb) => {
+          qb.where('pm.accountNumber ILIKE :search', { search: `%${search}%` })
+            .orWhere('pm.accountHolderName ILIKE :search', { search: `%${search}%` })
+            .orWhere('pm.bankName ILIKE :search', { search: `%${search}%` });
+          
+          if (user.role === UserRole.ADMIN) {
+            qb.orWhere('user.name ILIKE :search', { search: `%${search}%` })
+              .orWhere('user.email ILIKE :search', { search: `%${search}%` });
+          }
+        }),
+      );
+    }
+
+    // Type filter
+    if (type) {
+      query.andWhere('pm.type = :type', { type });
+    }
+
+    // Status filter
+    if (status) {
+      query.andWhere('pm.status = :status', { status });
+    }
+
+    const [items, total] = await query
+      .orderBy('pm.id', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOne(id: number, user: User) {
