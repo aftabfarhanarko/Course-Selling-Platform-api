@@ -48,9 +48,9 @@ export class BkashService {
     }
   }
 
-  async createPayment(amount: number, enrollmentId: number) {
+  async createPayment(amount: number, referenceId: string | number, callbackPath: string = '/enrollments/callback') {
     const token = await this.getToken();
-    const callbackURL = `${this.configService.get('APP_URL')}/enrollment/bkash/callback`;
+    const callbackURL = `${this.configService.get('APP_URL')}${callbackPath}`;
 
     try {
       const response = await firstValueFrom(
@@ -63,7 +63,7 @@ export class BkashService {
             amount: amount.toString(),
             currency: 'BDT',
             intent: 'sale',
-            merchantInvoiceNumber: `INV_${enrollmentId}_${Date.now()}`,
+            merchantInvoiceNumber: `INV_${referenceId}_${Date.now()}`,
           },
           {
             headers: {

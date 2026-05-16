@@ -12,6 +12,12 @@ import { CategoryModule } from './category/category.module';
 import { InstructorModule } from './instructor/instructor.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { PaymentmethodModule } from './paymentmethod/paymentmethod.module';
+import { ProductsModule } from './products/products.module';
+import { PercentageModule } from './percentage/percentage.module';
+import { WithdrawModule } from './withdraw/withdraw.module';
+import { WalletModule } from './wallet/wallet.module';
+import { ShopModule } from './shop/shop.module';
+import { ShopPurchaseModule } from './shop-purchase/shop-purchase.module';
 
 @Module({
   imports: [
@@ -40,6 +46,12 @@ import { PaymentmethodModule } from './paymentmethod/paymentmethod.module';
     InstructorModule,
     EnrollmentModule,
     PaymentmethodModule,
+    ProductsModule,
+    PercentageModule,
+    WithdrawModule,
+    WalletModule,
+    ShopModule,
+    ShopPurchaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

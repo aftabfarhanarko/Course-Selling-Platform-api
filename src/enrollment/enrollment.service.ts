@@ -65,7 +65,11 @@ export class EnrollmentService {
     const savedEnrollment = await this.enrollmentRepository.save(enrollment);
 
     // Get bKash payment URL
-    const paymentResponse = await this.bkashService.createPayment(course.price, savedEnrollment.id);
+    const paymentResponse = await this.bkashService.createPayment(
+      course.price,
+      savedEnrollment.id,
+      `/enrollments/callback?enrollmentId=${savedEnrollment.id}`
+    );
     
     return {
       enrollmentId: savedEnrollment.id,

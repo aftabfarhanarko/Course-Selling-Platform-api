@@ -15,6 +15,6 @@ import { BkashService } from './bkash.service';
   ],
   controllers: [EnrollmentController],
   providers: [EnrollmentService, BkashService],
-  exports: [EnrollmentService],
+  exports: [EnrollmentService, BkashService],
 })
 export class EnrollmentModule {}
