@@ -89,10 +89,27 @@ export class ProductsController {
   @Roles(UserRole.ADMIN)
   approve(
     @Param('id') id: string,
-    @Body() approveProductDto: ApproveProductDto,
     @Request() req: any,
   ) {
-    return this.productsService.approve(+id, approveProductDto, req.user);
+    return this.productsService.approve(
+      +id,
+      { status: ProductStatus.APPROVED },
+      req.user,
+    );
+  }
+
+  @Post(':id/reject')
+  @Roles(UserRole.ADMIN)
+  reject(
+    @Param('id') id: string,
+    @Body() body: { reason: string },
+    @Request() req: any,
+  ) {
+    return this.productsService.approve(
+      +id,
+      { status: ProductStatus.REJECTED, rejectReason: body.reason },
+      req.user,
+    );
   }
 }
 
