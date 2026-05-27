@@ -22,8 +22,12 @@ export class CourseService {
       thumbnailUrl = this.mediaService.getUploadUrl(file.filename, req);
     }
 
+    const { categoryId, instructorId, ...rest } = createCourseDto;
+
     const course = this.courseRepository.create({
-      ...createCourseDto,
+      ...rest,
+      category: categoryId ? { id: categoryId } as any : undefined,
+      instructor: instructorId ? { id: instructorId } as any : undefined,
       thumbnail: thumbnailUrl,
     });
     return this.courseRepository.save(course);
@@ -110,7 +114,18 @@ export class CourseService {
       updateCourseDto.thumbnail = this.mediaService.getUploadUrl(file.filename, req);
     }
 
-    Object.assign(course, updateCourseDto);
+    const { categoryId, instructorId, ...rest } = updateCourseDto;
+
+    Object.assign(course, rest);
+    
+    if (categoryId !== undefined) {
+      course.category = categoryId ? { id: categoryId } as any : null;
+    }
+    
+    if (instructorId !== undefined) {
+      course.instructor = instructorId ? { id: instructorId } as any : null;
+    }
+
     return this.courseRepository.save(course);
   }
 

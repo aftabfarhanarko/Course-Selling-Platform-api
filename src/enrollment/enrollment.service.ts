@@ -158,7 +158,7 @@ export class EnrollmentService {
       relations: ['course', 'course.instructor'],
     });
 
-    return enrollments.map((e) => e.course);
+    return enrollments;
   }
 
   async findAll() {
