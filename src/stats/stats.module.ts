@@ -6,9 +6,11 @@ import { Enrollment } from '../enrollment/entities/enrollment.entity';
 import { Course } from '../course/entities/course.entity';
 import { User } from '../users/entities/user.entity';
 import { ShopPurchase } from '../shop-purchase/entities/shop-purchase.entity';
+import { Wallet } from '../wallet/entities/wallet.entity';
+import { Withdraw } from '../withdraw/entities/withdraw.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Enrollment, Course, User, ShopPurchase])],
+  imports: [TypeOrmModule.forFeature([Enrollment, Course, User, ShopPurchase, Wallet, Withdraw])],
   controllers: [StatsController],
   providers: [StatsService],
 })

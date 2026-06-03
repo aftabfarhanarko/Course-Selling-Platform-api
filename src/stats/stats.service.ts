@@ -5,6 +5,8 @@ import { Enrollment, EnrollmentStatus } from '../enrollment/entities/enrollment.
 import { Course } from '../course/entities/course.entity';
 import { User } from '../users/entities/user.entity';
 import { ShopPurchase, ShopPurchaseStatus } from '../shop-purchase/entities/shop-purchase.entity';
+import { Wallet } from '../wallet/entities/wallet.entity';
+import { Withdraw } from '../withdraw/entities/withdraw.entity';
 
 @Injectable()
 export class StatsService {
@@ -17,6 +19,10 @@ export class StatsService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(ShopPurchase)
     private readonly shopPurchaseRepository: Repository<ShopPurchase>,
+    @InjectRepository(Wallet)
+    private readonly walletRepository: Repository<Wallet>,
+    @InjectRepository(Withdraw)
+    private readonly withdrawRepository: Repository<Withdraw>,
   ) {}
 
   async getStats() {
@@ -269,6 +275,150 @@ export class StatsService {
       weeklyData,
       transactions: sortedTransactions,
       activities
+    };
+  }
+
+  async getStudentDashboardStats(userId: number) {
+    // 1. Get Wallet Balance
+    const wallet = await this.walletRepository.findOne({ where: { user: { id: userId } } });
+    const balance = wallet ? Number(wallet.balance) : 0;
+
+    // 2. Affiliate Earnings (Mocked for now since no affiliate ledger)
+    const affiliateEarnings = balance > 0 ? (balance * 0.3) : 0; // Mock 30% of wallet
+
+    // 3. Courses Enrolled
+    const enrolledCourses = await this.enrollmentRepository.find({
+      where: { student: { id: userId }, status: EnrollmentStatus.COMPLETED },
+      relations: ['course']
+    });
+    const activeModules = enrolledCourses.length;
+
+    // 4. Progress Data & Continue Learning (from most recent course)
+    let progressData = {
+      percentage: 0,
+      label: "No Active Courses",
+      status: "Enroll to start learning!",
+    };
+    let continueLearning = {
+      title: "Explore our courses",
+      module: "Visit the store to start learning.",
+      progress: 0,
+    };
+
+    if (enrolledCourses.length > 0) {
+      const mostRecentCourse = enrolledCourses.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0].course;
+      
+      progressData = {
+        percentage: 65, // Mocked percentage
+        label: mostRecentCourse?.title || "Course",
+        status: "Keep going!",
+      };
+      
+      continueLearning = {
+        title: mostRecentCourse?.title || "Course",
+        module: "Module: Continue where you left off.",
+        progress: 65, // Mocked progress
+      };
+    }
+
+    // 5. Recent Activity
+    const activities: any[] = [];
+    
+    // Add Course Purchases
+    enrolledCourses.forEach(e => {
+      activities.push({
+        id: `c_${e.id}`,
+        title: 'Course Purchase',
+        subtitle: e.course?.title || 'Unknown Course',
+        amount: `-$${Number(e.amount || 0).toLocaleString()}`,
+        type: 'expense',
+        icon: 'ShoppingBag',
+        iconBg: 'bg-primary/10 dark:bg-primary/20',
+        iconColor: 'text-primary',
+        timestamp: new Date(e.createdAt).getTime()
+      });
+    });
+
+    // Add Shop Purchases
+    const shopPurchases = await this.shopPurchaseRepository.find({
+      where: { user: { id: userId }, status: ShopPurchaseStatus.COMPLETED },
+      relations: ['shop']
+    });
+    
+    shopPurchases.forEach(p => {
+      activities.push({
+        id: `s_${p.id}`,
+        title: 'Shop Purchase',
+        subtitle: p.shop?.name || 'Unknown Product',
+        amount: `-$${Number(p.amount || 0).toLocaleString()}`,
+        type: 'expense',
+        icon: 'ShoppingBag',
+        iconBg: 'bg-primary/10 dark:bg-primary/20',
+        iconColor: 'text-primary',
+        timestamp: new Date(p.createdAt).getTime()
+      });
+    });
+
+    // Add Withdrawals
+    const withdrawals = await this.withdrawRepository.find({
+      where: { user: { id: userId } },
+    });
+
+    withdrawals.forEach(w => {
+      activities.push({
+        id: `w_${w.id}`,
+        title: 'Wallet Withdrawal',
+        subtitle: `Status: ${w.status}`,
+        amount: `-$${Number(w.totalAmount || 0).toLocaleString()}`,
+        type: 'withdraw',
+        icon: 'Landmark',
+        iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
+        timestamp: new Date(w.createdAt).getTime()
+      });
+    });
+
+    activities.sort((a, b) => b.timestamp - a.timestamp);
+    const sortedActivities = activities.slice(0, 5).map(({ timestamp, ...rest }) => rest);
+
+    // If no activities, add a welcome one
+    if (sortedActivities.length === 0) {
+      sortedActivities.push({
+        id: 'welcome_1',
+        title: 'Welcome!',
+        subtitle: 'You just joined the platform.',
+        amount: '',
+        type: 'income',
+        icon: 'TrendingUp',
+        iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
+      });
+    }
+
+    return {
+      progressData,
+      dashboardStats: {
+        currentBalance: {
+          amount: balance,
+          currency: "USD",
+          percentageChange: 12, // Mocked trend
+          label: "CURRENT WALLET BALANCE",
+        },
+        affiliateEarnings: {
+          amount: affiliateEarnings,
+          currency: "USD",
+          lifetime: true,
+          nextPayoutDate: "End of Month",
+          label: "TOTAL AFFILIATE EARNINGS",
+        },
+        coursesEnrolled: {
+          activeModules,
+          label: "TOTAL COURSES ENROLLED",
+          subtext: "Total active courses",
+        },
+      },
+      activities: sortedActivities,
+      continueLearning
     };
   }
 }
