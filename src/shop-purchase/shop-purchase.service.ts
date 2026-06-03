@@ -191,7 +191,7 @@ export class ShopPurchaseService {
       name: p.user?.name || 'Anonymous',
       course: p.shop?.name || 'Unknown Product',
       amount: `+$${p.amount || p.shop?.price || '0.00'}`,
-      avatar: p.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.user?.name || 'A')}`,
+      avatar: p.user?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.user?.name || 'A')}`,
     }));
   }
 }

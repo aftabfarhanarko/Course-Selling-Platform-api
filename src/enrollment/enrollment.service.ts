@@ -205,7 +205,7 @@ export class EnrollmentService {
       name: e.student?.name || 'Anonymous',
       course: e.course?.title || 'Unknown Course',
       amount: `+$${e.amount || e.course?.price || '0.00'}`,
-      avatar: e.student?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.student?.name || 'A')}`,
+      avatar: e.student?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.student?.name || 'A')}`,
     }));
   }
 }
