@@ -366,8 +366,8 @@ export class WithdrawService {
     });
 
     return withdraws.map(w => ({
-      userName: this.maskName(w.user.name),
-      userPhoto: w.user.photo,
+      userName: w.user?.name || 'Unknown',
+      userPhoto: w.user?.photo || null,
       amount: w.studentAmount,
       time: w.updatedAt,
     }));
@@ -383,10 +383,10 @@ export class WithdrawService {
 
     return withdraws.map(w => ({
       id: w.id,
-      name: this.maskName(w.user.name),
+      name: w.user?.name || 'Unknown',
       course: w.product?.botName || w.enrollment?.course?.title || 'Course/Product',
       amount: `+$${w.studentAmount || '0.00'}`,
-      avatar: w.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(this.maskName(w.user.name))}`,
+      avatar: w.user?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(w.user?.name || 'Unknown')}`,
     }));
   }
 
