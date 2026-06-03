@@ -51,6 +51,17 @@ export class CourseController {
     return this.courseService.create(createCourseDto, file, req);
   }
 
+  @Get('all')
+  findAllPublic(
+    @Query('search') search?: string,
+    @Query('category') categoryId?: string,
+    @Query('instructor') instructorId?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.courseService.findAllPublic({ search, categoryId, instructorId, page, limit });
+  }
+
   @Get()
   findAll(
     @Query('search') search?: string,

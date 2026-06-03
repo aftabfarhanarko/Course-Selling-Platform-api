@@ -18,6 +18,7 @@ import { WithdrawModule } from './withdraw/withdraw.module';
 import { WalletModule } from './wallet/wallet.module';
 import { ShopModule } from './shop/shop.module';
 import { ShopPurchaseModule } from './shop-purchase/shop-purchase.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ShopPurchaseModule } from './shop-purchase/shop-purchase.module';
     WalletModule,
     ShopModule,
     ShopPurchaseModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

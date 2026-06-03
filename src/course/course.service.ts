@@ -85,6 +85,24 @@ export class CourseService {
     };
   }
 
+  async findAllPublic(options: {
+    search?: string;
+    categoryId?: string;
+    instructorId?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const result = await this.findAll(options);
+    
+    // Omit courseUrl from public response
+    result.items = result.items.map(item => {
+      const { courseUrl, ...rest } = item;
+      return rest as any;
+    });
+
+    return result;
+  }
+
   async findOne(id: number): Promise<Course> {
     const course = await this.courseRepository.createQueryBuilder('course')
       .leftJoinAndSelect('course.category', 'category')
