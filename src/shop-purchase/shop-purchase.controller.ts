@@ -62,11 +62,6 @@ export class ShopPurchaseController {
     return await this.shopPurchaseService.submitManualPurchase(manualDto.userId, manualDto);
   }
 
-  @Get('live')
-  async getLiveEarnings() {
-    return await this.shopPurchaseService.getLiveEarnings();
-  }
-
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

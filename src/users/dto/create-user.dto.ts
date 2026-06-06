@@ -1,4 +1,5 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { UserRole } from '../entities/user.entity';
 
 export class CreateUserDto {
@@ -15,6 +16,7 @@ export class CreateUserDto {
 
   @IsEnum(UserRole)
   @IsOptional()
+  @Transform(({ value }) => typeof value === 'string' ? value.toLowerCase() : value)
   role?: UserRole;
 
   @IsString()

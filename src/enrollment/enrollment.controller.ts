@@ -74,11 +74,6 @@ export class EnrollmentController {
     return await this.enrollmentService.getReferredEnrollments(req.user.id);
   }
 
-  @Get('live')
-  async getLiveEarnings() {
-    return await this.enrollmentService.getLiveEarnings();
-  }
-
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
