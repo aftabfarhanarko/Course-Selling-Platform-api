@@ -1,8 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, OneToMany, OneToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  DeleteDateColumn,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { PaymentMethod } from '../../paymentmethod/entities/paymentmethod.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Wallet } from '../../wallet/entities/wallet.entity';
-
 
 export enum UserRole {
   STUDENT = 'student',
@@ -87,4 +93,3 @@ export class User {
   @OneToOne(() => Wallet, (wallet) => wallet.user)
   wallet: Wallet;
 }
-

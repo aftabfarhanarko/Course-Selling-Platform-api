@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Request, Body, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Body,
+  Get,
+} from '@nestjs/common';
 import * as express from 'express';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -39,7 +46,10 @@ export class AuthController {
   // ===========================================================================
 
   @Post('refresh')
-  async refresh(@Body('refreshToken') refreshToken: string, @Body('userId') userId: number) {
+  async refresh(
+    @Body('refreshToken') refreshToken: string,
+    @Body('userId') userId: number,
+  ) {
     return this.authService.refreshTokens(userId, refreshToken);
   }
 
@@ -69,7 +79,10 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  async resetPassword(@Body('token') token: string, @Body('newPassword') newPass: string) {
+  async resetPassword(
+    @Body('token') token: string,
+    @Body('newPassword') newPass: string,
+  ) {
     return this.authService.resetPassword(token, newPass);
   }
 }

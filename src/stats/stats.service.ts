@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Enrollment, EnrollmentStatus } from '../enrollment/entities/enrollment.entity';
+import {
+  Enrollment,
+  EnrollmentStatus,
+} from '../enrollment/entities/enrollment.entity';
 import { Course } from '../course/entities/course.entity';
 import { User } from '../users/entities/user.entity';
-import { ShopPurchase, ShopPurchaseStatus } from '../shop-purchase/entities/shop-purchase.entity';
+import {
+  ShopPurchase,
+  ShopPurchaseStatus,
+} from '../shop-purchase/entities/shop-purchase.entity';
 import { Wallet } from '../wallet/entities/wallet.entity';
 import { Withdraw } from '../withdraw/entities/withdraw.entity';
 
@@ -30,24 +36,28 @@ export class StatsService {
     const { totalRevenue } = await this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .select('SUM(enrollment.amount)', 'totalRevenue')
-      .where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+      .where('enrollment.status = :status', {
+        status: EnrollmentStatus.COMPLETED,
+      })
       .getRawOne();
-      
+
     // 2. Course Sales
     const courseSales = await this.enrollmentRepository.count({
-      where: { status: EnrollmentStatus.COMPLETED }
+      where: { status: EnrollmentStatus.COMPLETED },
     });
 
     // 3. Active Students
     const { activeStudents } = await this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .select('COUNT(DISTINCT enrollment.studentId)', 'activeStudents')
-      .where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+      .where('enrollment.status = :status', {
+        status: EnrollmentStatus.COMPLETED,
+      })
       .getRawOne();
 
     // 4. Published Courses
     const publishedCourses = await this.courseRepository.count({
-      where: { isPublished: true }
+      where: { isPublished: true },
     });
 
     const kpis = [
@@ -91,15 +101,17 @@ export class StatsService {
 
     const recentEnrollments = await this.enrollmentRepository
       .createQueryBuilder('enrollment')
-      .where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+      .where('enrollment.status = :status', {
+        status: EnrollmentStatus.COMPLETED,
+      })
       .andWhere('enrollment.createdAt >= :sevenDaysAgo', { sevenDaysAgo })
       .getMany();
 
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const salesTrendMap = new Map<string, number>();
-    days.forEach(d => salesTrendMap.set(d, 0));
+    days.forEach((d) => salesTrendMap.set(d, 0));
 
-    recentEnrollments.forEach(e => {
+    recentEnrollments.forEach((e) => {
       const dayName = days[new Date(e.createdAt).getDay()];
       salesTrendMap.set(dayName, salesTrendMap.get(dayName)! + 1);
     });
@@ -109,7 +121,10 @@ export class StatsService {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dayName = days[d.getDay()];
-      salesTrend.push({ label: dayName, value: salesTrendMap.get(dayName) || 0 });
+      salesTrend.push({
+        label: dayName,
+        value: salesTrendMap.get(dayName) || 0,
+      });
     }
 
     // 6. Top Courses by Revenue
@@ -118,7 +133,9 @@ export class StatsService {
       .select('enrollment.courseId', 'courseId')
       .addSelect('COUNT(enrollment.id)', 'students')
       .addSelect('SUM(enrollment.amount)', 'revenue')
-      .where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+      .where('enrollment.status = :status', {
+        status: EnrollmentStatus.COMPLETED,
+      })
       .groupBy('enrollment.courseId')
       .orderBy('revenue', 'DESC')
       .limit(4)
@@ -128,7 +145,7 @@ export class StatsService {
     for (const stat of topCourseStats) {
       const course = await this.courseRepository.findOne({
         where: { id: stat.courseId },
-        relations: ['category']
+        relations: ['category'],
       });
       if (course) {
         topCourses.push({
@@ -165,19 +182,27 @@ export class StatsService {
     const { enrollRevenue } = await this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .select('SUM(enrollment.amount)', 'enrollRevenue')
-      .where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+      .where('enrollment.status = :status', {
+        status: EnrollmentStatus.COMPLETED,
+      })
       .getRawOne();
-      
+
     const { shopRevenue } = await this.shopPurchaseRepository
       .createQueryBuilder('shopPurchase')
       .select('SUM(shopPurchase.amount)', 'shopRevenue')
-      .where('shopPurchase.status = :status', { status: ShopPurchaseStatus.COMPLETED })
+      .where('shopPurchase.status = :status', {
+        status: ShopPurchaseStatus.COMPLETED,
+      })
       .getRawOne();
 
     const revenueMTD = Number(enrollRevenue || 0) + Number(shopRevenue || 0);
 
-    const enrollCount = await this.enrollmentRepository.count({ where: { status: EnrollmentStatus.COMPLETED } });
-    const shopCount = await this.shopPurchaseRepository.count({ where: { status: ShopPurchaseStatus.COMPLETED } });
+    const enrollCount = await this.enrollmentRepository.count({
+      where: { status: EnrollmentStatus.COMPLETED },
+    });
+    const shopCount = await this.shopPurchaseRepository.count({
+      where: { status: ShopPurchaseStatus.COMPLETED },
+    });
     const completedTransactions = enrollCount + shopCount;
 
     // Daily Data (last 7 days)
@@ -185,147 +210,165 @@ export class StatsService {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      dailyData.push({ day: d.getDate().toString().padStart(2, '0'), value: Math.floor(Math.random() * 50) + 50 }); // Mocked aggregation for brevity
+      dailyData.push({
+        day: d.getDate().toString().padStart(2, '0'),
+        value: Math.floor(Math.random() * 50) + 50,
+      }); // Mocked aggregation for brevity
     }
 
     // Weekly Data (last 4 weeks)
     const weeklyData = [
-      { day: "W1", value: Math.floor(Math.random() * 200) + 100 },
-      { day: "W2", value: Math.floor(Math.random() * 200) + 100 },
-      { day: "W3", value: Math.floor(Math.random() * 200) + 100 },
-      { day: "W4", value: Math.floor(Math.random() * 200) + 100 },
+      { day: 'W1', value: Math.floor(Math.random() * 200) + 100 },
+      { day: 'W2', value: Math.floor(Math.random() * 200) + 100 },
+      { day: 'W3', value: Math.floor(Math.random() * 200) + 100 },
+      { day: 'W4', value: Math.floor(Math.random() * 200) + 100 },
     ]; // Mocked aggregation for brevity
 
     // Recent Transactions
     const recentEnrollments = await this.enrollmentRepository.find({
       relations: ['student', 'course'],
       order: { createdAt: 'DESC' },
-      take: 5
+      take: 5,
     });
 
     const recentShopPurchases = await this.shopPurchaseRepository.find({
       relations: ['user', 'shop'],
       order: { createdAt: 'DESC' },
-      take: 5
+      take: 5,
     });
 
     const transactions: any[] = [];
-    
-    recentEnrollments.forEach(e => {
+
+    recentEnrollments.forEach((e) => {
       transactions.push({
         id: `TX-E${e.id}`,
         user: e.student?.name || 'Unknown',
         initials: (e.student?.name || 'U').substring(0, 2).toUpperCase(),
         product: e.course?.title || 'Course',
         amount: `$${Number(e.amount || 0).toLocaleString()}`,
-        date: new Date(e.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        date: new Date(e.createdAt).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
         status: e.status === EnrollmentStatus.COMPLETED ? 'Success' : 'Pending',
-        timestamp: new Date(e.createdAt).getTime()
+        timestamp: new Date(e.createdAt).getTime(),
       });
     });
 
-    recentShopPurchases.forEach(p => {
+    recentShopPurchases.forEach((p) => {
       transactions.push({
         id: `TX-S${p.id}`,
         user: p.user?.name || 'Unknown',
         initials: (p.user?.name || 'U').substring(0, 2).toUpperCase(),
         product: p.shop?.name || 'Product',
         amount: `$${Number(p.amount || 0).toLocaleString()}`,
-        date: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        status: p.status === ShopPurchaseStatus.COMPLETED ? 'Success' : 'Pending',
-        timestamp: new Date(p.createdAt).getTime()
+        date: new Date(p.createdAt).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+        status:
+          p.status === ShopPurchaseStatus.COMPLETED ? 'Success' : 'Pending',
+        timestamp: new Date(p.createdAt).getTime(),
       });
     });
 
     transactions.sort((a, b) => b.timestamp - a.timestamp);
-    const sortedTransactions = transactions.slice(0, 5).map(({ timestamp, ...rest }) => rest);
+    const sortedTransactions = transactions
+      .slice(0, 5)
+      .map(({ timestamp, ...rest }) => rest);
 
     // Mock Activities
     const activities = [
       {
-        icon: "UserPlus",
-        color: "#3B82F6",
-        title: "New user registered",
-        time: "5 mins ago",
-        desc: "Sarah Jenkins joined the platform.",
+        icon: 'UserPlus',
+        color: '#3B82F6',
+        title: 'New user registered',
+        time: '5 mins ago',
+        desc: 'Sarah Jenkins joined the platform.',
       },
       {
-        icon: "ShoppingCart",
-        color: "#10B981",
-        title: "New purchase",
-        time: "12 mins ago",
-        desc: "Pro Masterclass purchased by Mark E.",
+        icon: 'ShoppingCart',
+        color: '#10B981',
+        title: 'New purchase',
+        time: '12 mins ago',
+        desc: 'Pro Masterclass purchased by Mark E.',
       },
       {
-        icon: "Star",
-        color: "#F59E0B",
-        title: "New review",
-        time: "1 hour ago",
-        desc: "5-star review left on UI Architecture Path.",
-      }
+        icon: 'Star',
+        color: '#F59E0B',
+        title: 'New review',
+        time: '1 hour ago',
+        desc: '5-star review left on UI Architecture Path.',
+      },
     ];
 
     return {
       kpis: {
         totalActiveUsers,
         revenueMTD: `$${revenueMTD.toLocaleString()}`,
-        completedTransactions
+        completedTransactions,
       },
       dailyData,
       weeklyData,
       transactions: sortedTransactions,
-      activities
+      activities,
     };
   }
 
   async getStudentDashboardStats(userId: number) {
     // 1. Get Wallet Balance
-    const wallet = await this.walletRepository.findOne({ where: { user: { id: userId } } });
+    const wallet = await this.walletRepository.findOne({
+      where: { user: { id: userId } },
+    });
     const balance = wallet ? Number(wallet.balance) : 0;
 
     // 2. Affiliate Earnings (Mocked for now since no affiliate ledger)
-    const affiliateEarnings = balance > 0 ? (balance * 0.3) : 0; // Mock 30% of wallet
+    const affiliateEarnings = balance > 0 ? balance * 0.3 : 0; // Mock 30% of wallet
 
     // 3. Courses Enrolled
     const enrolledCourses = await this.enrollmentRepository.find({
       where: { student: { id: userId }, status: EnrollmentStatus.COMPLETED },
-      relations: ['course']
+      relations: ['course'],
     });
     const activeModules = enrolledCourses.length;
 
     // 4. Progress Data & Continue Learning (from most recent course)
     let progressData = {
       percentage: 0,
-      label: "No Active Courses",
-      status: "Enroll to start learning!",
+      label: 'No Active Courses',
+      status: 'Enroll to start learning!',
     };
     let continueLearning = {
-      title: "Explore our courses",
-      module: "Visit the store to start learning.",
+      title: 'Explore our courses',
+      module: 'Visit the store to start learning.',
       progress: 0,
     };
 
     if (enrolledCourses.length > 0) {
-      const mostRecentCourse = enrolledCourses.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0].course;
-      
+      const mostRecentCourse = enrolledCourses.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      )[0].course;
+
       progressData = {
         percentage: 65, // Mocked percentage
-        label: mostRecentCourse?.title || "Course",
-        status: "Keep going!",
+        label: mostRecentCourse?.title || 'Course',
+        status: 'Keep going!',
       };
-      
+
       continueLearning = {
-        title: mostRecentCourse?.title || "Course",
-        module: "Module: Continue where you left off.",
+        title: mostRecentCourse?.title || 'Course',
+        module: 'Module: Continue where you left off.',
         progress: 65, // Mocked progress
       };
     }
 
     // 5. Recent Activity
     const activities: any[] = [];
-    
+
     // Add Course Purchases
-    enrolledCourses.forEach(e => {
+    enrolledCourses.forEach((e) => {
       activities.push({
         id: `c_${e.id}`,
         title: 'Course Purchase',
@@ -335,17 +378,17 @@ export class StatsService {
         icon: 'ShoppingBag',
         iconBg: 'bg-primary/10 dark:bg-primary/20',
         iconColor: 'text-primary',
-        timestamp: new Date(e.createdAt).getTime()
+        timestamp: new Date(e.createdAt).getTime(),
       });
     });
 
     // Add Shop Purchases
     const shopPurchases = await this.shopPurchaseRepository.find({
       where: { user: { id: userId }, status: ShopPurchaseStatus.COMPLETED },
-      relations: ['shop']
+      relations: ['shop'],
     });
-    
-    shopPurchases.forEach(p => {
+
+    shopPurchases.forEach((p) => {
       activities.push({
         id: `s_${p.id}`,
         title: 'Shop Purchase',
@@ -355,7 +398,7 @@ export class StatsService {
         icon: 'ShoppingBag',
         iconBg: 'bg-primary/10 dark:bg-primary/20',
         iconColor: 'text-primary',
-        timestamp: new Date(p.createdAt).getTime()
+        timestamp: new Date(p.createdAt).getTime(),
       });
     });
 
@@ -364,7 +407,7 @@ export class StatsService {
       where: { user: { id: userId } },
     });
 
-    withdrawals.forEach(w => {
+    withdrawals.forEach((w) => {
       activities.push({
         id: `w_${w.id}`,
         title: 'Wallet Withdrawal',
@@ -374,12 +417,14 @@ export class StatsService {
         icon: 'Landmark',
         iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
         iconColor: 'text-emerald-600 dark:text-emerald-400',
-        timestamp: new Date(w.createdAt).getTime()
+        timestamp: new Date(w.createdAt).getTime(),
       });
     });
 
     activities.sort((a, b) => b.timestamp - a.timestamp);
-    const sortedActivities = activities.slice(0, 5).map(({ timestamp, ...rest }) => rest);
+    const sortedActivities = activities
+      .slice(0, 5)
+      .map(({ timestamp, ...rest }) => rest);
 
     // If no activities, add a welcome one
     if (sortedActivities.length === 0) {
@@ -400,25 +445,25 @@ export class StatsService {
       dashboardStats: {
         currentBalance: {
           amount: balance,
-          currency: "USD",
+          currency: 'USD',
           percentageChange: 12, // Mocked trend
-          label: "CURRENT WALLET BALANCE",
+          label: 'CURRENT WALLET BALANCE',
         },
         affiliateEarnings: {
           amount: affiliateEarnings,
-          currency: "USD",
+          currency: 'USD',
           lifetime: true,
-          nextPayoutDate: "End of Month",
-          label: "TOTAL AFFILIATE EARNINGS",
+          nextPayoutDate: 'End of Month',
+          label: 'TOTAL AFFILIATE EARNINGS',
         },
         coursesEnrolled: {
           activeModules,
-          label: "TOTAL COURSES ENROLLED",
-          subtext: "Total active courses",
+          label: 'TOTAL COURSES ENROLLED',
+          subtext: 'Total active courses',
         },
       },
       activities: sortedActivities,
-      continueLearning
+      continueLearning,
     };
   }
 }

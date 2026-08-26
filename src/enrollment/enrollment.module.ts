@@ -9,10 +9,7 @@ import { HttpModule } from '@nestjs/axios';
 import { BkashService } from './bkash.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Enrollment, Course, User]),
-    HttpModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Enrollment, Course, User]), HttpModule],
   controllers: [EnrollmentController],
   providers: [EnrollmentService, BkashService],
   exports: [EnrollmentService, BkashService],

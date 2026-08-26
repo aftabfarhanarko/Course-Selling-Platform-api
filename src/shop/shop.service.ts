@@ -16,10 +16,14 @@ export class ShopService {
     private mediaService: MediaService,
   ) {}
 
-  async create(createShopDto: CreateShopDto, file?: any, req?: express.Request) {
+  async create(
+    createShopDto: CreateShopDto,
+    file?: any,
+    req?: express.Request,
+  ) {
     const { password, ...rest } = createShopDto;
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     let logoUrl = createShopDto.logo;
     if (file && req) {
       logoUrl = this.mediaService.getUploadUrl(file.filename, req);
@@ -37,7 +41,8 @@ export class ShopService {
     const { search, page = 1, limit = 10 } = options;
     const skip = (page - 1) * limit;
 
-    const query = this.shopRepository.createQueryBuilder('shop')
+    const query = this.shopRepository
+      .createQueryBuilder('shop')
       .select([
         'shop.id',
         'shop.name',
@@ -79,9 +84,14 @@ export class ShopService {
     return shop;
   }
 
-  async update(id: number, updateShopDto: UpdateShopDto, file?: any, req?: express.Request) {
+  async update(
+    id: number,
+    updateShopDto: UpdateShopDto,
+    file?: any,
+    req?: express.Request,
+  ) {
     const shop = await this.findOne(id);
-    
+
     if (updateShopDto.password) {
       updateShopDto.password = await bcrypt.hash(updateShopDto.password, 10);
     }

@@ -6,10 +6,7 @@ import { Course } from './entities/course.entity';
 import { MediaModule } from '../media/media.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Course]),
-    MediaModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Course]), MediaModule],
   controllers: [CourseController],
   providers: [CourseService],
   exports: [CourseService],

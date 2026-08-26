@@ -35,15 +35,27 @@ export class WithdrawController {
 
   @Post('request')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  requestWithdrawal(@Request() req: any, @Body() createWithdrawDto: CreateWithdrawDto) {
-    return this.withdrawService.requestWithdrawal(req.user.id, createWithdrawDto);
+  requestWithdrawal(
+    @Request() req: any,
+    @Body() createWithdrawDto: CreateWithdrawDto,
+  ) {
+    return this.withdrawService.requestWithdrawal(
+      req.user.id,
+      createWithdrawDto,
+    );
   }
 
   @Post(':id/approve')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  approveWithdrawal(@Param('id') id: string, @Body() approveWithdrawDto: ApproveWithdrawDto) {
-    return this.withdrawService.approveWithdrawal(+id, approveWithdrawDto.percentageId);
+  approveWithdrawal(
+    @Param('id') id: string,
+    @Body() approveWithdrawDto: ApproveWithdrawDto,
+  ) {
+    return this.withdrawService.approveWithdrawal(
+      +id,
+      approveWithdrawDto.percentageId,
+    );
   }
 
   @Post(':id/reject')

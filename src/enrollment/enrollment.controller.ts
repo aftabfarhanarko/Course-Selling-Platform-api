@@ -25,11 +25,14 @@ export class EnrollmentController {
   constructor(
     private readonly enrollmentService: EnrollmentService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   @Post('pay')
   async initiatePayment(@Body() createEnrollmentDto: CreateEnrollmentDto) {
-    return await this.enrollmentService.initiateEnrollment(createEnrollmentDto.studentId, createEnrollmentDto);
+    return await this.enrollmentService.initiateEnrollment(
+      createEnrollmentDto.studentId,
+      createEnrollmentDto,
+    );
   }
 
   @Get('callback')
@@ -39,13 +42,17 @@ export class EnrollmentController {
     @Query('status') status: string,
     @Res() res: Response,
   ) {
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
 
     if (status === 'cancel' || status === 'failure') {
       return res.redirect(`${frontendUrl}/payment/cancel`);
     }
 
-    const result = await this.enrollmentService.handlePaymentCallback(paymentID, parseInt(enrollmentId));
+    const result = await this.enrollmentService.handlePaymentCallback(
+      paymentID,
+      parseInt(enrollmentId),
+    );
 
     if (result.status === 'success') {
       return res.redirect(`${frontendUrl}/payment/success`);

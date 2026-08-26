@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcryptjs';
@@ -39,7 +43,9 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id, role: user.role };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'defaultRefreshSecret',
+      secret:
+        this.configService.get<string>('JWT_REFRESH_SECRET') ||
+        'defaultRefreshSecret',
       expiresIn: '7d',
     });
 
@@ -71,7 +77,10 @@ export class AuthService {
       throw new UnauthorizedException('Access Denied');
     }
 
-    const refreshTokenMatches = await bcrypt.compare(refreshToken, user.refreshToken);
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
     if (!refreshTokenMatches) {
       throw new UnauthorizedException('Access Denied');
     }
@@ -79,7 +88,9 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id, role: user.role };
     const accessToken = this.jwtService.sign(payload);
     const newRefreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'defaultRefreshSecret',
+      secret:
+        this.configService.get<string>('JWT_REFRESH_SECRET') ||
+        'defaultRefreshSecret',
       expiresIn: '7d',
     });
 
@@ -119,11 +130,15 @@ export class AuthService {
   async forgotPassword(email: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      return { message: 'If an account exists with this email, you will receive a reset link.' };
+      return {
+        message:
+          'If an account exists with this email, you will receive a reset link.',
+      };
     }
 
     const token =
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
     const expires = new Date(Date.now() + 3600000); // 1 hour
 
     await this.usersService.updateResetToken(user.id, token, expires);
@@ -136,7 +151,11 @@ export class AuthService {
 
   async resetPassword(token: string, newPass: string) {
     const user = await this.usersService.findByResetToken(token);
-    if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+    if (
+      !user ||
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
       throw new UnauthorizedException('Invalid or expired reset token');
     }
 

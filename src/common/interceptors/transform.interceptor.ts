@@ -15,9 +15,10 @@ export interface Response<T> {
 }
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, Response<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  Response<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -29,7 +30,9 @@ export class TransformInterceptor<T>
       map((data) => {
         // If data already contains a message, use it and move other fields to data
         const message = data?.message || 'Request successful';
-        const resultData = data?.message ? (({ message, ...rest }) => rest)(data) : data;
+        const resultData = data?.message
+          ? (({ message, ...rest }) => rest)(data)
+          : data;
 
         return {
           success: true,

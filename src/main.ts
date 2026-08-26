@@ -1,17 +1,25 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import compression from 'compression';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: true,
+  });
 
-  // Serve static files (CDN)
+  // Gzip Response Compression
+  app.use(compression());
+
+  // Serve static files (CDN) with cache headers
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads',
+    maxAge: '7d',
+    immutable: true,
   });
 
   // Global Interceptor
@@ -25,10 +33,18 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      stopAtFirstError: true,
     }),
   );
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'https://maruftech.online', 'https://course-selling-platform-pfny.vercel.app/', 'https://www.maruftech.online'],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://maruftech.online',
+      'https://course-selling-platform-pfny.vercel.app/',
+      'https://www.maruftech.online',
+    ],
     credentials: true,
   });
 

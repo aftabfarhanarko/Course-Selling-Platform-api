@@ -12,4 +12,3 @@ export class CreateProductDto {
   @IsNumber()
   totalAmount: number;
 }
-

@@ -49,7 +49,8 @@ export class WalletService {
     const { search, page = 1, limit = 10 } = options;
     const skip = (page - 1) * limit;
 
-    const query = this.walletRepository.createQueryBuilder('wallet')
+    const query = this.walletRepository
+      .createQueryBuilder('wallet')
       .leftJoinAndSelect('wallet.user', 'user');
 
     if (search) {
@@ -76,7 +77,10 @@ export class WalletService {
   }
 
   async findOne(id: number) {
-    const wallet = await this.walletRepository.findOne({ where: { id }, relations: ['user'] });
+    const wallet = await this.walletRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
     if (!wallet) {
       throw new NotFoundException(`Wallet with ID ${id} not found`);
     }

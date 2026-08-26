@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Enrollment, EnrollmentStatus } from './entities/enrollment.entity';
@@ -20,20 +24,27 @@ export class EnrollmentService {
     private readonly bkashService: BkashService,
   ) {}
 
-  async initiateEnrollment(studentId: number, createEnrollmentDto: CreateEnrollmentDto) {
+  async initiateEnrollment(
+    studentId: number,
+    createEnrollmentDto: CreateEnrollmentDto,
+  ) {
     const { courseId } = createEnrollmentDto;
-    const course = await this.courseRepository.findOne({ where: { id: courseId } });
+    const course = await this.courseRepository.findOne({
+      where: { id: courseId },
+    });
     if (!course) throw new NotFoundException('Course not found');
 
-    const student = await this.userRepository.findOne({ where: { id: studentId } });
+    const student = await this.userRepository.findOne({
+      where: { id: studentId },
+    });
     if (!student) throw new NotFoundException('Student not found');
 
     // 1. Check if already successfully enrolled
     const existingCompleted = await this.enrollmentRepository.findOne({
-      where: { 
-        student: { id: studentId }, 
-        course: { id: courseId }, 
-        status: EnrollmentStatus.COMPLETED 
+      where: {
+        student: { id: studentId },
+        course: { id: courseId },
+        status: EnrollmentStatus.COMPLETED,
       },
     });
 
@@ -43,16 +54,18 @@ export class EnrollmentService {
 
     // 2. Reuse PENDING enrollment if exists, otherwise create new
     let enrollment = await this.enrollmentRepository.findOne({
-      where: { 
-        student: { id: studentId }, 
-        course: { id: courseId }, 
-        status: EnrollmentStatus.PENDING 
+      where: {
+        student: { id: studentId },
+        course: { id: courseId },
+        status: EnrollmentStatus.PENDING,
       },
     });
 
     let affiliateUser: User | null = null;
     if (createEnrollmentDto.referCode) {
-      affiliateUser = await this.userRepository.findOne({ where: { referCode: createEnrollmentDto.referCode } });
+      affiliateUser = await this.userRepository.findOne({
+        where: { referCode: createEnrollmentDto.referCode },
+      });
     }
 
     if (!enrollment) {
@@ -61,7 +74,6 @@ export class EnrollmentService {
         course,
         ...(affiliateUser ? { affiliate: affiliateUser } : {}),
       });
-
     } else if (!enrollment.affiliate && affiliateUser) {
       enrollment.affiliate = affiliateUser;
     }
@@ -77,9 +89,9 @@ export class EnrollmentService {
     const paymentResponse = await this.bkashService.createPayment(
       course.price,
       savedEnrollment.id,
-      `/enrollments/callback?enrollmentId=${savedEnrollment.id}`
+      `/enrollments/callback?enrollmentId=${savedEnrollment.id}`,
     );
-    
+
     return {
       enrollmentId: savedEnrollment.id,
       paymentUrl: paymentResponse.bkashURL,
@@ -110,12 +122,17 @@ export class EnrollmentService {
   }
 
   async manualEnrollment(manualEnrollmentDto: ManualEnrollmentDto) {
-    const { courseId, studentId, amount, paymentMethod, transactionId } = manualEnrollmentDto;
+    const { courseId, studentId, amount, paymentMethod, transactionId } =
+      manualEnrollmentDto;
 
-    const course = await this.courseRepository.findOne({ where: { id: courseId } });
+    const course = await this.courseRepository.findOne({
+      where: { id: courseId },
+    });
     if (!course) throw new NotFoundException('Course not found');
 
-    const student = await this.userRepository.findOne({ where: { id: studentId } });
+    const student = await this.userRepository.findOne({
+      where: { id: studentId },
+    });
     if (!student) throw new NotFoundException('Student not found');
 
     let enrollment = await this.enrollmentRepository.findOne({
@@ -128,7 +145,9 @@ export class EnrollmentService {
 
     let affiliateUser: User | null = null;
     if (manualEnrollmentDto.referCode) {
-      affiliateUser = await this.userRepository.findOne({ where: { referCode: manualEnrollmentDto.referCode } });
+      affiliateUser = await this.userRepository.findOne({
+        where: { referCode: manualEnrollmentDto.referCode },
+      });
     }
 
     if (!enrollment) {
@@ -178,7 +197,9 @@ export class EnrollmentService {
 
     // If user is not admin, they can only see their own enrollment
     if (user.role !== 'admin' && enrollment.student.id !== user.id) {
-      throw new BadRequestException('You do not have permission to view this enrollment');
+      throw new BadRequestException(
+        'You do not have permission to view this enrollment',
+      );
     }
 
     return enrollment;
@@ -186,7 +207,10 @@ export class EnrollmentService {
 
   async getReferredEnrollments(affiliateId: number) {
     return await this.enrollmentRepository.find({
-      where: { affiliate: { id: affiliateId }, status: EnrollmentStatus.COMPLETED },
+      where: {
+        affiliate: { id: affiliateId },
+        status: EnrollmentStatus.COMPLETED,
+      },
       relations: ['student', 'course'],
       order: { enrolledAt: 'DESC' },
     });
@@ -200,12 +224,14 @@ export class EnrollmentService {
       take: 20,
     });
 
-    return enrollments.map(e => ({
+    return enrollments.map((e) => ({
       id: e.id,
       name: e.student?.name || 'Anonymous',
       course: e.course?.title || 'Unknown Course',
       amount: `+$${e.amount || e.course?.price || '0.00'}`,
-      avatar: e.student?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.student?.name || 'A')}`,
+      avatar:
+        e.student?.photo ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(e.student?.name || 'A')}`,
     }));
   }
 }

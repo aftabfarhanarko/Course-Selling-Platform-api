@@ -13,11 +13,15 @@ export class CourseService {
   constructor(
     @InjectRepository(Course)
     private courseRepository: Repository<Course>,
-    
+
     private mediaService: MediaService,
   ) {}
 
-  async create(createCourseDto: CreateCourseDto, file?: any, req?: express.Request): Promise<Course> {
+  async create(
+    createCourseDto: CreateCourseDto,
+    file?: any,
+    req?: express.Request,
+  ): Promise<Course> {
     let thumbnailUrl = createCourseDto.thumbnail;
     if (file && req) {
       thumbnailUrl = this.mediaService.getUploadUrl(file.filename, req);
@@ -27,8 +31,8 @@ export class CourseService {
 
     const course = this.courseRepository.create({
       ...rest,
-      category: categoryId ? { id: categoryId } as any : undefined,
-      instructor: instructorId ? { id: instructorId } as any : undefined,
+      category: categoryId ? ({ id: categoryId } as any) : undefined,
+      instructor: instructorId ? ({ id: instructorId } as any) : undefined,
       thumbnail: thumbnailUrl,
     });
     return this.courseRepository.save(course);
@@ -44,20 +48,27 @@ export class CourseService {
     const { search, categoryId, instructorId, page = 1, limit = 10 } = options;
     const skip = (page - 1) * limit;
 
-    const query = this.courseRepository.createQueryBuilder('course')
+    const query = this.courseRepository
+      .createQueryBuilder('course')
       .leftJoinAndSelect('course.category', 'category')
       .leftJoinAndSelect('course.instructor', 'instructor')
       .loadRelationCountAndMap(
         'course.enrollmentCount',
         'course.enrollments',
         'enrollment',
-        (qb) => qb.where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+        (qb) =>
+          qb.where('enrollment.status = :status', {
+            status: EnrollmentStatus.COMPLETED,
+          }),
       );
 
     if (search) {
-      query.where('course.title ILIKE :search OR course.description ILIKE :search', {
-        search: `%${search}%`,
-      });
+      query.where(
+        'course.title ILIKE :search OR course.description ILIKE :search',
+        {
+          search: `%${search}%`,
+        },
+      );
     }
 
     if (categoryId) {
@@ -93,9 +104,9 @@ export class CourseService {
     limit?: number;
   }) {
     const result = await this.findAll(options);
-    
+
     // Omit courseUrl from public response
-    result.items = result.items.map(item => {
+    result.items = result.items.map((item) => {
       const { courseUrl, ...rest } = item;
       return rest as any;
     });
@@ -104,14 +115,18 @@ export class CourseService {
   }
 
   async findOne(id: number): Promise<Course> {
-    const course = await this.courseRepository.createQueryBuilder('course')
+    const course = await this.courseRepository
+      .createQueryBuilder('course')
       .leftJoinAndSelect('course.category', 'category')
       .leftJoinAndSelect('course.instructor', 'instructor')
       .loadRelationCountAndMap(
         'course.enrollmentCount',
         'course.enrollments',
         'enrollment',
-        (qb) => qb.where('enrollment.status = :status', { status: EnrollmentStatus.COMPLETED })
+        (qb) =>
+          qb.where('enrollment.status = :status', {
+            status: EnrollmentStatus.COMPLETED,
+          }),
       )
       .where('course.id = :id', { id })
       .getOne();
@@ -130,19 +145,22 @@ export class CourseService {
     const course = await this.findOne(id);
 
     if (file && req) {
-      updateCourseDto.thumbnail = this.mediaService.getUploadUrl(file.filename, req);
+      updateCourseDto.thumbnail = this.mediaService.getUploadUrl(
+        file.filename,
+        req,
+      );
     }
 
     const { categoryId, instructorId, ...rest } = updateCourseDto;
 
     Object.assign(course, rest);
-    
+
     if (categoryId !== undefined) {
-      course.category = categoryId ? { id: categoryId } as any : null;
+      course.category = categoryId ? ({ id: categoryId } as any) : null;
     }
-    
+
     if (instructorId !== undefined) {
-      course.instructor = instructorId ? { id: instructorId } as any : null;
+      course.instructor = instructorId ? ({ id: instructorId } as any) : null;
     }
 
     return this.courseRepository.save(course);

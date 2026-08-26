@@ -31,10 +31,19 @@ import { StatsModule } from './stats/stats.module';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
+        synchronize:
+          configService.get<string>('DB_SYNCHRONIZE') === 'true' ||
+          configService.get<boolean>('DB_SYNCHRONIZE') === true,
         ssl: {
           rejectUnauthorized: false,
         },
+        extra: {
+          max: 25,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 5000,
+          keepAlive: true,
+        },
+        cache: true,
       }),
       inject: [ConfigService],
     }),
@@ -58,4 +67,4 @@ import { StatsModule } from './stats/stats.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

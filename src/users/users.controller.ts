@@ -12,7 +12,10 @@ import {
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  FileInterceptor,
+  FileFieldsInterceptor,
+} from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import * as express from 'express';
@@ -39,7 +42,8 @@ export class UsersController {
         storage: diskStorage({
           destination: './uploads',
           filename: (req, file, callback) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const uniqueSuffix =
+              Date.now() + '-' + Math.round(Math.random() * 1e9);
             const ext = extname(file.originalname);
             callback(null, `${uniqueSuffix}${ext}`);
           },
@@ -49,7 +53,12 @@ export class UsersController {
   )
   create(
     @Body() createUserDto: CreateUserDto,
-    @UploadedFiles() files: { image?: Express.Multer.File[]; nidFrontSide?: Express.Multer.File[]; nidBackSide?: Express.Multer.File[] },
+    @UploadedFiles()
+    files: {
+      image?: Express.Multer.File[];
+      nidFrontSide?: Express.Multer.File[];
+      nidBackSide?: Express.Multer.File[];
+    },
     @Request() req: express.Request,
   ) {
     return this.usersService.create(createUserDto, files, req);
@@ -82,7 +91,8 @@ export class UsersController {
         storage: diskStorage({
           destination: './uploads',
           filename: (req, file, callback) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const uniqueSuffix =
+              Date.now() + '-' + Math.round(Math.random() * 1e9);
             const ext = extname(file.originalname);
             callback(null, `${uniqueSuffix}${ext}`);
           },
@@ -91,9 +101,14 @@ export class UsersController {
     ),
   )
   updateProfile(
-    @Request() req: any, 
+    @Request() req: any,
     @Body() updateData: any,
-    @UploadedFiles() files: { image?: Express.Multer.File[]; nidFrontSide?: Express.Multer.File[]; nidBackSide?: Express.Multer.File[] },
+    @UploadedFiles()
+    files: {
+      image?: Express.Multer.File[];
+      nidFrontSide?: Express.Multer.File[];
+      nidBackSide?: Express.Multer.File[];
+    },
   ) {
     return this.usersService.update(req.user.id, updateData, files, req);
   }

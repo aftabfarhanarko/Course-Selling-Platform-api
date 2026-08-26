@@ -26,7 +26,6 @@ export class ProductsService {
     });
   }
 
-
   async findAll(
     user: User,
     options: {
@@ -50,7 +49,9 @@ export class ProductsService {
     }
 
     if (search) {
-      query.andWhere('product.botName ILIKE :search', { search: `%${search}%` });
+      query.andWhere('product.botName ILIKE :search', {
+        search: `%${search}%`,
+      });
     }
 
     if (status) {
@@ -89,7 +90,9 @@ export class ProductsService {
       .orderBy('product.createdAt', 'DESC');
 
     if (search) {
-      query.andWhere('product.botName ILIKE :search', { search: `%${search}%` });
+      query.andWhere('product.botName ILIKE :search', {
+        search: `%${search}%`,
+      });
     }
 
     if (status) {
@@ -109,10 +112,7 @@ export class ProductsService {
     };
   }
 
-
   async findOne(id: number, user: User) {
-
-
     const product = await this.productRepository.findOne({
       where: { id },
       relations: ['user'],
@@ -153,7 +153,6 @@ export class ProductsService {
     });
   }
 
-
   async update(id: number, updateProductDto: UpdateProductDto, user: User) {
     const product = await this.findOne(id, user);
     Object.assign(product, updateProductDto);
@@ -164,10 +163,8 @@ export class ProductsService {
     });
   }
 
-
   async remove(id: number, user: User) {
     const product = await this.findOne(id, user);
     return await this.productRepository.softRemove(product);
   }
-
 }

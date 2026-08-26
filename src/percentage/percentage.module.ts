@@ -10,4 +10,3 @@ import { Percentage } from './entities/percentage.entity';
   providers: [PercentageService],
 })
 export class PercentageModule {}
-

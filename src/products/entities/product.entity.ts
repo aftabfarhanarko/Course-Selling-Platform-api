@@ -17,7 +17,6 @@ export enum ProductStatus {
   PAID = 'paid',
 }
 
-
 @Entity('products')
 export class Product {
   @PrimaryGeneratedColumn()
@@ -42,14 +41,11 @@ export class Product {
   @Column({ type: 'varchar', nullable: true })
   approvedByName: string | null;
 
-
-
   @Column({ type: 'timestamp', nullable: true })
   approvalDate: Date;
 
   @Column({ type: 'text', nullable: true })
   rejectReason: string | null;
-
 
   @ManyToOne(() => User, (user) => user.products)
   user: User;
@@ -63,5 +59,3 @@ export class Product {
   @DeleteDateColumn()
   deletedAt: Date;
 }
-
-

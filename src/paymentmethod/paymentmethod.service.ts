@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets } from 'typeorm';
 import { CreatePaymentmethodDto } from './dto/create-paymentmethod.dto';
 import { UpdatePaymentmethodDto } from './dto/update-paymentmethod.dto';
-import { PaymentMethod, PaymentMethodStatus } from './entities/paymentmethod.entity';
+import {
+  PaymentMethod,
+  PaymentMethodStatus,
+} from './entities/paymentmethod.entity';
 import { User, UserRole } from '../users/entities/user.entity';
 
 @Injectable()
@@ -58,12 +65,15 @@ export class PaymentmethodService {
       query.andWhere(
         new Brackets((qb) => {
           qb.where('pm.accountNumber ILIKE :search', { search: `%${search}%` })
-            .orWhere('pm.accountHolderName ILIKE :search', { search: `%${search}%` })
+            .orWhere('pm.accountHolderName ILIKE :search', {
+              search: `%${search}%`,
+            })
             .orWhere('pm.bankName ILIKE :search', { search: `%${search}%` });
-          
+
           if (user.role === UserRole.ADMIN) {
-            qb.orWhere('user.name ILIKE :search', { search: `%${search}%` })
-              .orWhere('user.email ILIKE :search', { search: `%${search}%` });
+            qb.orWhere('user.name ILIKE :search', {
+              search: `%${search}%`,
+            }).orWhere('user.email ILIKE :search', { search: `%${search}%` });
           }
         }),
       );
@@ -114,7 +124,11 @@ export class PaymentmethodService {
     return paymentMethod;
   }
 
-  async update(id: number, updatePaymentmethodDto: UpdatePaymentmethodDto, user: User) {
+  async update(
+    id: number,
+    updatePaymentmethodDto: UpdatePaymentmethodDto,
+    user: User,
+  ) {
     const paymentMethod = await this.findOne(id, user);
 
     if (updatePaymentmethodDto.isDefault && !paymentMethod.isDefault) {
@@ -124,9 +138,9 @@ export class PaymentmethodService {
       );
     }
 
-    // Reset status to pending if account info changed? 
+    // Reset status to pending if account info changed?
     // Maybe only if specifically requested. For now, let's just update.
-    
+
     Object.assign(paymentMethod, updatePaymentmethodDto);
     return await this.paymentMethodRepository.save(paymentMethod);
   }
@@ -137,7 +151,9 @@ export class PaymentmethodService {
   }
 
   async approve(id: number) {
-    const paymentMethod = await this.paymentMethodRepository.findOne({ where: { id } });
+    const paymentMethod = await this.paymentMethodRepository.findOne({
+      where: { id },
+    });
     if (!paymentMethod) {
       throw new NotFoundException(`Payment method #${id} not found`);
     }
@@ -152,7 +168,9 @@ export class PaymentmethodService {
       throw new BadRequestException('Reject reason is required');
     }
 
-    const paymentMethod = await this.paymentMethodRepository.findOne({ where: { id } });
+    const paymentMethod = await this.paymentMethodRepository.findOne({
+      where: { id },
+    });
     if (!paymentMethod) {
       throw new NotFoundException(`Payment method #${id} not found`);
     }

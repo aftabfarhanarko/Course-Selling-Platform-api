@@ -1,5 +1,9 @@
 // bKash Payment Service
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -43,12 +47,19 @@ export class BkashService {
       );
       return response.data.id_token;
     } catch (error) {
-      this.logger.error('Failed to get bKash token', error.response?.data || error.message);
+      this.logger.error(
+        'Failed to get bKash token',
+        error.response?.data || error.message,
+      );
       throw new InternalServerErrorException('bKash Authentication Failed');
     }
   }
 
-  async createPayment(amount: number, referenceId: string | number, callbackPath: string = '/enrollments/callback') {
+  async createPayment(
+    amount: number,
+    referenceId: string | number,
+    callbackPath: string = '/enrollments/callback',
+  ) {
     const token = await this.getToken();
     const callbackURL = `${this.configService.get('APP_URL')}${callbackPath}`;
 
@@ -80,7 +91,10 @@ export class BkashService {
         status: response.data.transactionStatus || 'success',
       };
     } catch (error) {
-      this.logger.error('Failed to create bKash payment', error.response?.data || error.message);
+      this.logger.error(
+        'Failed to create bKash payment',
+        error.response?.data || error.message,
+      );
       throw new InternalServerErrorException('bKash Payment Creation Failed');
     }
   }
@@ -104,7 +118,10 @@ export class BkashService {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to execute bKash payment', error.response?.data || error.message);
+      this.logger.error(
+        'Failed to execute bKash payment',
+        error.response?.data || error.message,
+      );
       throw new InternalServerErrorException('bKash Payment Execution Failed');
     }
   }
@@ -128,7 +145,10 @@ export class BkashService {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to query bKash payment', error.response?.data || error.message);
+      this.logger.error(
+        'Failed to query bKash payment',
+        error.response?.data || error.message,
+      );
       throw new InternalServerErrorException('bKash Payment Query Failed');
     }
   }

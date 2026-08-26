@@ -24,7 +24,10 @@ export class PaymentmethodController {
   constructor(private readonly paymentmethodService: PaymentmethodService) {}
 
   @Post()
-  create(@Body() createPaymentmethodDto: CreatePaymentmethodDto, @Request() req: any) {
+  create(
+    @Body() createPaymentmethodDto: CreatePaymentmethodDto,
+    @Request() req: any,
+  ) {
     return this.paymentmethodService.create(createPaymentmethodDto, req.user);
   }
 
@@ -77,7 +80,11 @@ export class PaymentmethodController {
     @Body() updatePaymentmethodDto: UpdatePaymentmethodDto,
     @Request() req: any,
   ) {
-    return this.paymentmethodService.update(+id, updatePaymentmethodDto, req.user);
+    return this.paymentmethodService.update(
+      +id,
+      updatePaymentmethodDto,
+      req.user,
+    );
   }
 
   @Delete(':id')

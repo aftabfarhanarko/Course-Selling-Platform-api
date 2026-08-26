@@ -30,7 +30,10 @@ export class ShopPurchaseController {
   @Post('buy/bkash')
   @UseGuards(JwtAuthGuard)
   async initiatePayment(@Body() createDto: CreateShopPurchaseDto) {
-    return await this.shopPurchaseService.initiateBkashPayment(createDto.userId, createDto);
+    return await this.shopPurchaseService.initiateBkashPayment(
+      createDto.userId,
+      createDto,
+    );
   }
 
   @Get('bkash/callback')
@@ -40,14 +43,18 @@ export class ShopPurchaseController {
     @Query('status') status: string,
     @Res() res: Response,
   ) {
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
 
     if (status === 'cancel' || status === 'failure') {
       return res.redirect(`${frontendUrl}/payment/cancel`);
     }
 
     // Pass the purchaseId to the service (it acts as the referenceId)
-    const result = await this.shopPurchaseService.handleBkashCallback(paymentID, parseInt(purchaseId));
+    const result = await this.shopPurchaseService.handleBkashCallback(
+      paymentID,
+      parseInt(purchaseId),
+    );
 
     if (result.status === 'success') {
       return res.redirect(`${frontendUrl}/payment/success`);
@@ -59,7 +66,10 @@ export class ShopPurchaseController {
   @Post('buy/manual')
   @UseGuards(JwtAuthGuard)
   async submitManualPurchase(@Body() manualDto: ManualShopPurchaseDto) {
-    return await this.shopPurchaseService.submitManualPurchase(manualDto.userId, manualDto);
+    return await this.shopPurchaseService.submitManualPurchase(
+      manualDto.userId,
+      manualDto,
+    );
   }
 
   @Get()

@@ -8,7 +8,7 @@ export class MediaService {
 
   getUploadUrl(filename: string, req: express.Request): string {
     const cdnUrl = this.configService.get<string>('CDN_URL');
-    
+
     if (cdnUrl) {
       return `${cdnUrl.replace(/\/$/, '')}/${filename}`;
     } else {

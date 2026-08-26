@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { PercentageService } from './percentage.service';
 import { CreatePercentageDto } from './dto/create-percentage.dto';
 import { UpdatePercentageDto } from './dto/update-percentage.dto';
@@ -30,7 +39,10 @@ export class PercentageController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN)
-  update(@Param('id') id: string, @Body() updatePercentageDto: UpdatePercentageDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePercentageDto: UpdatePercentageDto,
+  ) {
     return this.percentageService.update(+id, updatePercentageDto);
   }
 
@@ -40,4 +52,3 @@ export class PercentageController {
     return this.percentageService.remove(+id);
   }
 }
-

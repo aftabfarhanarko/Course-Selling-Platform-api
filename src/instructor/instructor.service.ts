@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { Instructor } from './entities/instructor.entity';
@@ -25,9 +29,13 @@ export class InstructorService {
     }
 
     // Check if instructor profile already exists
-    const existingInstructor = await this.instructorRepository.findOneBy({ user: { id: userId } });
+    const existingInstructor = await this.instructorRepository.findOneBy({
+      user: { id: userId },
+    });
     if (existingInstructor) {
-      throw new ConflictException(`Instructor profile already exists for user ID ${userId}`);
+      throw new ConflictException(
+        `Instructor profile already exists for user ID ${userId}`,
+      );
     }
 
     // Update user role to INSTRUCTOR
@@ -41,7 +49,9 @@ export class InstructorService {
     return await this.instructorRepository.save(instructor);
   }
 
-  async findAll(query: { search?: string; page?: number; limit?: number } = {}): Promise<{ data: Instructor[]; total: number }> {
+  async findAll(
+    query: { search?: string; page?: number; limit?: number } = {},
+  ): Promise<{ data: Instructor[]; total: number }> {
     const { search, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
@@ -53,9 +63,12 @@ export class InstructorService {
       .orderBy('instructor.id', 'DESC');
 
     if (search) {
-      queryBuilder.where('user.name ILike :search OR instructor.designation ILike :search', {
-        search: `%${search}%`,
-      });
+      queryBuilder.where(
+        'user.name ILike :search OR instructor.designation ILike :search',
+        {
+          search: `%${search}%`,
+        },
+      );
     }
 
     const [data, total] = await queryBuilder.getManyAndCount();
@@ -74,7 +87,10 @@ export class InstructorService {
     return instructor;
   }
 
-  async update(id: number, updateInstructorDto: UpdateInstructorDto): Promise<Instructor> {
+  async update(
+    id: number,
+    updateInstructorDto: UpdateInstructorDto,
+  ): Promise<Instructor> {
     const instructor = await this.findOne(id);
     Object.assign(instructor, updateInstructorDto);
     return await this.instructorRepository.save(instructor);

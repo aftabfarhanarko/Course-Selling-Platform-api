@@ -45,7 +45,10 @@ export class InstructorController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInstructorDto: UpdateInstructorDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateInstructorDto: UpdateInstructorDto,
+  ) {
     return this.instructorService.update(+id, updateInstructorDto);
   }
 

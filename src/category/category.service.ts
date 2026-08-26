@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
@@ -15,7 +19,11 @@ export class CategoryService {
     private mediaService: MediaService,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto, file?: any, req?: express.Request): Promise<Category> {
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    file?: any,
+    req?: express.Request,
+  ): Promise<Category> {
     const existingCategory = await this.categoryRepository.findOne({
       where: { name: createCategoryDto.name },
     });
@@ -81,7 +89,10 @@ export class CategoryService {
     const category = await this.findOne(id);
 
     if (file && req) {
-      updateCategoryDto.photo = this.mediaService.getUploadUrl(file.filename, req);
+      updateCategoryDto.photo = this.mediaService.getUploadUrl(
+        file.filename,
+        req,
+      );
     }
 
     Object.assign(category, updateCategoryDto);

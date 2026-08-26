@@ -10,7 +10,16 @@ import { Wallet } from '../wallet/entities/wallet.entity';
 import { Withdraw } from '../withdraw/entities/withdraw.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Enrollment, Course, User, ShopPurchase, Wallet, Withdraw])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Enrollment,
+      Course,
+      User,
+      ShopPurchase,
+      Wallet,
+      Withdraw,
+    ]),
+  ],
   controllers: [StatsController],
   providers: [StatsService],
 })

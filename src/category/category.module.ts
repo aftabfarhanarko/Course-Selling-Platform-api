@@ -6,10 +6,7 @@ import { Category } from './entities/category.entity';
 import { MediaModule } from '../media/media.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Category]),
-    MediaModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Category]), MediaModule],
   controllers: [CategoryController],
   providers: [CategoryService],
   exports: [CategoryService],

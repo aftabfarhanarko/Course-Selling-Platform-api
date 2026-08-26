@@ -1,7 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ShopPurchase, ShopPurchaseStatus } from './entities/shop-purchase.entity';
+import {
+  ShopPurchase,
+  ShopPurchaseStatus,
+} from './entities/shop-purchase.entity';
 import { Shop } from '../shop/entities/shop.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateShopPurchaseDto } from './dto/create-shop-purchase.dto';
@@ -30,10 +37,10 @@ export class ShopPurchaseService {
 
     // 1. Check if already purchased
     const existingCompleted = await this.shopPurchaseRepository.findOne({
-      where: { 
-        user: { id: userId }, 
-        shop: { id: shopId }, 
-        status: ShopPurchaseStatus.COMPLETED 
+      where: {
+        user: { id: userId },
+        shop: { id: shopId },
+        status: ShopPurchaseStatus.COMPLETED,
       },
     });
 
@@ -43,10 +50,10 @@ export class ShopPurchaseService {
 
     // 2. Reuse PENDING purchase if exists, otherwise create new
     let purchase = await this.shopPurchaseRepository.findOne({
-      where: { 
-        user: { id: userId }, 
-        shop: { id: shopId }, 
-        status: ShopPurchaseStatus.PENDING 
+      where: {
+        user: { id: userId },
+        shop: { id: shopId },
+        status: ShopPurchaseStatus.PENDING,
       },
     });
 
@@ -66,11 +73,11 @@ export class ShopPurchaseService {
 
     // Get bKash payment URL (using a specific callback path for shop)
     const paymentResponse = await this.bkashService.createPayment(
-      purchase.amount, 
-      savedPurchase.id, 
-      `/shop-purchases/bkash/callback?purchaseId=${savedPurchase.id}`
+      purchase.amount,
+      savedPurchase.id,
+      `/shop-purchases/bkash/callback?purchaseId=${savedPurchase.id}`,
     );
-    
+
     return {
       purchaseId: savedPurchase.id,
       paymentUrl: paymentResponse.bkashURL,
@@ -110,7 +117,11 @@ export class ShopPurchaseService {
     if (!user) throw new NotFoundException('User not found');
 
     const existingCompleted = await this.shopPurchaseRepository.findOne({
-      where: { user: { id: userId }, shop: { id: shopId }, status: ShopPurchaseStatus.COMPLETED },
+      where: {
+        user: { id: userId },
+        shop: { id: shopId },
+        status: ShopPurchaseStatus.COMPLETED,
+      },
     });
 
     if (existingCompleted) {
@@ -131,23 +142,33 @@ export class ShopPurchaseService {
   }
 
   async approveManualPurchase(id: number) {
-    const purchase = await this.shopPurchaseRepository.findOne({ where: { id } });
+    const purchase = await this.shopPurchaseRepository.findOne({
+      where: { id },
+    });
     if (!purchase) throw new NotFoundException('Purchase not found');
-    if (!purchase.isManual) throw new BadRequestException('Only manual purchases can be approved this way');
+    if (!purchase.isManual)
+      throw new BadRequestException(
+        'Only manual purchases can be approved this way',
+      );
 
     purchase.status = ShopPurchaseStatus.COMPLETED;
     purchase.purchasedAt = new Date();
-    
+
     return await this.shopPurchaseRepository.save(purchase);
   }
 
   async rejectManualPurchase(id: number) {
-    const purchase = await this.shopPurchaseRepository.findOne({ where: { id } });
+    const purchase = await this.shopPurchaseRepository.findOne({
+      where: { id },
+    });
     if (!purchase) throw new NotFoundException('Purchase not found');
-    if (!purchase.isManual) throw new BadRequestException('Only manual purchases can be rejected this way');
+    if (!purchase.isManual)
+      throw new BadRequestException(
+        'Only manual purchases can be rejected this way',
+      );
 
     purchase.status = ShopPurchaseStatus.REJECTED;
-    
+
     return await this.shopPurchaseRepository.save(purchase);
   }
 
@@ -159,7 +180,8 @@ export class ShopPurchaseService {
   }
 
   async findMyPurchases(userId: number) {
-    const purchases = await this.shopPurchaseRepository.createQueryBuilder('purchase')
+    const purchases = await this.shopPurchaseRepository
+      .createQueryBuilder('purchase')
       .leftJoinAndSelect('purchase.shop', 'shop')
       .addSelect('shop.password') // explicitly select password
       .where('purchase.userId = :userId', { userId })
@@ -186,12 +208,14 @@ export class ShopPurchaseService {
       take: 20,
     });
 
-    return purchases.map(p => ({
+    return purchases.map((p) => ({
       id: p.id,
       name: p.user?.name || 'Anonymous',
       course: p.shop?.name || 'Unknown Product',
       amount: `+$${p.amount || p.shop?.price || '0.00'}`,
-      avatar: p.user?.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.user?.name || 'A')}`,
+      avatar:
+        p.user?.photo ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(p.user?.name || 'A')}`,
     }));
   }
 }

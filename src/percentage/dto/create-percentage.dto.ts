@@ -10,4 +10,3 @@ export class CreatePercentageDto {
   @Max(100)
   percentage: number;
 }
-

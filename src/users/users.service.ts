@@ -7,8 +7,14 @@ import * as bcrypt from 'bcryptjs';
 import * as express from 'express';
 import { MediaService } from '../media/media.service';
 import { Course } from '../course/entities/course.entity';
-import { Enrollment, EnrollmentStatus } from '../enrollment/entities/enrollment.entity';
-import { Percentage, PercentageType } from '../percentage/entities/percentage.entity';
+import {
+  Enrollment,
+  EnrollmentStatus,
+} from '../enrollment/entities/enrollment.entity';
+import {
+  Percentage,
+  PercentageType,
+} from '../percentage/entities/percentage.entity';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +34,11 @@ export class UsersService {
   // USER CREATION
   // ===========================================================================
 
-  async create(createUserDto: CreateUserDto, files?: any, req?: express.Request): Promise<User> {
+  async create(
+    createUserDto: CreateUserDto,
+    files?: any,
+    req?: express.Request,
+  ): Promise<User> {
     const existingUser = await this.findByEmail(createUserDto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
@@ -43,18 +53,30 @@ export class UsersService {
         photoUrl = this.mediaService.getUploadUrl(files.image[0].filename, req);
       }
       if (files.nidFrontSide && files.nidFrontSide[0]) {
-        nidFrontUrl = this.mediaService.getUploadUrl(files.nidFrontSide[0].filename, req);
+        nidFrontUrl = this.mediaService.getUploadUrl(
+          files.nidFrontSide[0].filename,
+          req,
+        );
       }
       if (files.nidBackSide && files.nidBackSide[0]) {
-        nidBackUrl = this.mediaService.getUploadUrl(files.nidBackSide[0].filename, req);
+        nidBackUrl = this.mediaService.getUploadUrl(
+          files.nidBackSide[0].filename,
+          req,
+        );
       }
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     let referCode = createUserDto.referCode;
     if (!referCode && createUserDto.role === 'affiliate') {
-      const namePart = createUserDto.name.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
-      const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const namePart = createUserDto.name
+        .substring(0, 3)
+        .toUpperCase()
+        .replace(/[^A-Z]/g, 'X');
+      const randomPart = Math.random()
+        .toString(36)
+        .substring(2, 6)
+        .toUpperCase();
       referCode = `${namePart}${randomPart}`;
     }
 
@@ -69,27 +91,50 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async update(id: number, updateUserDto: any, files?: any, req?: express.Request): Promise<User> {
+  async update(
+    id: number,
+    updateUserDto: any,
+    files?: any,
+    req?: express.Request,
+  ): Promise<User> {
     if (files && req) {
       if (files.image && files.image[0]) {
-        updateUserDto.photo = this.mediaService.getUploadUrl(files.image[0].filename, req);
+        updateUserDto.photo = this.mediaService.getUploadUrl(
+          files.image[0].filename,
+          req,
+        );
       }
       if (files.nidFrontSide && files.nidFrontSide[0]) {
-        updateUserDto.nidFrontSide = this.mediaService.getUploadUrl(files.nidFrontSide[0].filename, req);
+        updateUserDto.nidFrontSide = this.mediaService.getUploadUrl(
+          files.nidFrontSide[0].filename,
+          req,
+        );
       }
       if (files.nidBackSide && files.nidBackSide[0]) {
-        updateUserDto.nidBackSide = this.mediaService.getUploadUrl(files.nidBackSide[0].filename, req);
+        updateUserDto.nidBackSide = this.mediaService.getUploadUrl(
+          files.nidBackSide[0].filename,
+          req,
+        );
       }
     }
-    
+
     await this.usersRepository.update(id, updateUserDto);
     return this.findOne(id) as Promise<User>;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ 
+    return this.usersRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'password', 'role', 'name', 'photo', 'refreshToken', 'isBanned']
+      select: [
+        'id',
+        'email',
+        'password',
+        'role',
+        'name',
+        'photo',
+        'refreshToken',
+        'isBanned',
+      ],
     });
   }
 
@@ -130,20 +175,27 @@ export class UsersService {
   // AFFILIATE DASHBOARD
   // ===========================================================================
 
-  async getAffiliateDashboard(userId: number, frontendUrl: string = 'http://localhost:3000') {
+  async getAffiliateDashboard(
+    userId: number,
+    frontendUrl: string = 'http://localhost:3000',
+  ) {
     const user = await this.findOne(userId);
     if (!user) {
       throw new ConflictException('User not found');
     }
-    
+
     // Fallback if affiliate percentage not set
     let affiliatePercentage = 0;
-    const percentageConfig = await this.percentageRepository.findOne({ where: { type: PercentageType.AFFILIATE } });
+    const percentageConfig = await this.percentageRepository.findOne({
+      where: { type: PercentageType.AFFILIATE },
+    });
     if (percentageConfig) {
       affiliatePercentage = Number(percentageConfig.percentage);
     }
 
-    const courses = await this.courseRepository.find({ where: { isPublished: true } });
+    const courses = await this.courseRepository.find({
+      where: { isPublished: true },
+    });
     const dashboardStats = [];
 
     for (const course of courses) {
@@ -151,13 +203,13 @@ export class UsersService {
         where: {
           course: { id: course.id },
           affiliate: { id: user.id },
-          status: EnrollmentStatus.COMPLETED
-        }
+          status: EnrollmentStatus.COMPLETED,
+        },
       });
 
       const totalEnrollments = enrollments.length;
       let totalIncome = 0;
-      
+
       for (const enrollment of enrollments) {
         totalIncome += (Number(enrollment.amount) * affiliatePercentage) / 100;
       }
@@ -169,7 +221,7 @@ export class UsersService {
         price: course.price,
         affiliateLink: `${frontendUrl}/course/${course.id}?ref=${user.referCode}`,
         totalEnrollments,
-        totalIncome
+        totalIncome,
       });
     }
 
@@ -180,7 +232,10 @@ export class UsersService {
   // AUTH HELPERS
   // ===========================================================================
 
-  async updateRefreshToken(userId: number, refreshToken: string | null): Promise<void> {
+  async updateRefreshToken(
+    userId: number,
+    refreshToken: string | null,
+  ): Promise<void> {
     await this.usersRepository.update(userId, { refreshToken });
   }
 
@@ -188,17 +243,21 @@ export class UsersService {
     await this.usersRepository.update(userId, { password: hashedPass });
   }
 
-  async updateResetToken(userId: number, token: string | null, expires: Date | null): Promise<void> {
-    await this.usersRepository.update(userId, { 
+  async updateResetToken(
+    userId: number,
+    token: string | null,
+    expires: Date | null,
+  ): Promise<void> {
+    await this.usersRepository.update(userId, {
       resetPasswordToken: token,
-      resetPasswordExpires: expires 
+      resetPasswordExpires: expires,
     });
   }
 
   async findByResetToken(token: string): Promise<User | null> {
-    return this.usersRepository.findOne({ 
+    return this.usersRepository.findOne({
       where: { resetPasswordToken: token },
-      select: ['id', 'email', 'resetPasswordExpires']
+      select: ['id', 'email', 'resetPasswordExpires'],
     });
   }
 
@@ -207,7 +266,7 @@ export class UsersService {
   // ===========================================================================
 
   async ban(id: number, reason: string): Promise<User> {
-    await this.usersRepository.update(id, { 
+    await this.usersRepository.update(id, {
       isBanned: true,
       banReason: reason,
     });
@@ -215,7 +274,7 @@ export class UsersService {
   }
 
   async unban(id: number): Promise<User> {
-    await this.usersRepository.update(id, { 
+    await this.usersRepository.update(id, {
       isBanned: false,
       banReason: null,
     });

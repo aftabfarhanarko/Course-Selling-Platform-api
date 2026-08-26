@@ -20,7 +20,6 @@ import { UserRole } from '../users/entities/user.entity';
 import { ApproveProductDto } from './dto/approve-product.dto';
 import { ProductStatus } from './entities/product.entity';
 
-
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductsController {
@@ -63,9 +62,6 @@ export class ProductsController {
     });
   }
 
-
-
-
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req: any) {
     return this.productsService.findOne(+id, req.user);
@@ -87,10 +83,7 @@ export class ProductsController {
 
   @Post(':id/approve')
   @Roles(UserRole.ADMIN)
-  approve(
-    @Param('id') id: string,
-    @Request() req: any,
-  ) {
+  approve(@Param('id') id: string, @Request() req: any) {
     return this.productsService.approve(
       +id,
       { status: ProductStatus.APPROVED },
@@ -112,7 +105,3 @@ export class ProductsController {
     );
   }
 }
-
-
-
-

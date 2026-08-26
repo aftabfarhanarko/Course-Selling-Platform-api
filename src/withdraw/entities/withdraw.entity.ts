@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Percentage } from '../../percentage/entities/percentage.entity';
@@ -21,14 +29,11 @@ export class Withdraw {
   @ManyToOne(() => Product, { nullable: true })
   product?: Product;
 
-
   @ManyToOne(() => Enrollment, { nullable: true })
   enrollment?: Enrollment;
 
-
   @ManyToOne(() => Percentage, { nullable: true })
   percentage?: Percentage;
-
 
   @Column({ type: 'decimal', precision: 15, scale: 2 })
   totalAmount: number;

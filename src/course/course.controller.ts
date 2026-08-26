@@ -36,7 +36,8 @@ export class CourseController {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           callback(null, `${uniqueSuffix}${ext}`);
         },
@@ -59,7 +60,13 @@ export class CourseController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.courseService.findAllPublic({ search, categoryId, instructorId, page, limit });
+    return this.courseService.findAllPublic({
+      search,
+      categoryId,
+      instructorId,
+      page,
+      limit,
+    });
   }
 
   @Get()
@@ -70,7 +77,13 @@ export class CourseController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.courseService.findAll({ search, categoryId, instructorId, page, limit });
+    return this.courseService.findAll({
+      search,
+      categoryId,
+      instructorId,
+      page,
+      limit,
+    });
   }
 
   @Get(':id')
@@ -86,7 +99,8 @@ export class CourseController {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           callback(null, `${uniqueSuffix}${ext}`);
         },
