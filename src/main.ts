@@ -38,13 +38,24 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://maruftech.online',
-      'https://course-selling-platform-pfny.vercel.app/',
-      'https://www.maruftech.online',
-    ],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, postman) or matching origins
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'https://maruftech.online',
+        'https://course-selling-platform-pfny.vercel.app',
+        'https://course-selling-platform-pfny.vercel.app/',
+        'https://course-selling-platform-red.vercel.app',
+        'https://course-selling-platform-red.vercel.app/',
+        'https://www.maruftech.online',
+      ];
+      if (!origin || allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all Vercel origins smoothly
+      }
+    },
     credentials: true,
   });
 
