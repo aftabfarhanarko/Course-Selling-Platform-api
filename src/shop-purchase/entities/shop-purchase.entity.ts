@@ -29,7 +29,7 @@ export class ShopPurchase {
   shop: Shop;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: ShopPurchaseStatus,
     default: ShopPurchaseStatus.PENDING,
   })
@@ -44,7 +44,7 @@ export class ShopPurchase {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   amount: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   purchasedAt: Date | null;
 
   @Column({ default: false })

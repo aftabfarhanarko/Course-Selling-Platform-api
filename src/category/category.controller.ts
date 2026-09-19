@@ -97,4 +97,11 @@ export class CategoryController {
   remove(@Param('id') id: string) {
     return this.categoryService.remove(+id);
   }
+
+  @Patch(':id/restore')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  restore(@Param('id') id: string) {
+    return this.categoryService.restore(+id);
+  }
 }

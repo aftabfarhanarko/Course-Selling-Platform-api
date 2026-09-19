@@ -32,7 +32,7 @@ export class Product {
   totalAmount: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: ProductStatus,
     default: ProductStatus.PENDING,
   })
@@ -41,7 +41,7 @@ export class Product {
   @Column({ type: 'varchar', nullable: true })
   approvedByName: string | null;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   approvalDate: Date;
 
   @Column({ type: 'text', nullable: true })

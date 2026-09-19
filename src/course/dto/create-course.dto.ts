@@ -13,8 +13,8 @@ export class CreateCourseDto {
   title: string;
 
   @IsString()
-  @IsNotEmpty()
-  slug: string;
+  @IsOptional()
+  slug?: string;
 
   @IsString()
   @IsOptional()

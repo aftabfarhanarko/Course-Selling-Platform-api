@@ -31,7 +31,7 @@ export class Enrollment {
   affiliate?: User;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: EnrollmentStatus,
     default: EnrollmentStatus.PENDING,
   })
@@ -46,7 +46,7 @@ export class Enrollment {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   amount: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   enrolledAt: Date | null;
 
   @Column({ default: false })

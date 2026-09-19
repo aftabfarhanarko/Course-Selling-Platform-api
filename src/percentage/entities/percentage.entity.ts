@@ -18,7 +18,7 @@ export class Percentage {
   id: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: PercentageType,
     unique: true, // Assuming one entry per type
   })

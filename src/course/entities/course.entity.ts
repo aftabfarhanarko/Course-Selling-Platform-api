@@ -47,7 +47,7 @@ export class Course {
   @Column({ type: 'text', nullable: true })
   courseUrl: string | null;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'simple-json', nullable: true })
   metadata: any;
 
   @OneToMany(() => Enrollment, (enrollment) => enrollment.course)

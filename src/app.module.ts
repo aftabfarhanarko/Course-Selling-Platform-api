@@ -18,6 +18,7 @@ import { WithdrawModule } from './withdraw/withdraw.module';
 import { WalletModule } from './wallet/wallet.module';
 import { ShopModule } from './shop/shop.module';
 import { ShopPurchaseModule } from './shop-purchase/shop-purchase.module';
+import { StatsModule } from './stats/stats.module';
 import { NotificationModule } from './notification/notification.module';
 
 @Module({
@@ -27,24 +28,35 @@ import { NotificationModule } from './notification/notification.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize:
-          configService.get<string>('DB_SYNCHRONIZE') === 'true' ||
-          configService.get<boolean>('DB_SYNCHRONIZE') === true,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-        extra: {
-          max: 25,
-          idleTimeoutMillis: 30000,
-          connectionTimeoutMillis: 5000,
-          keepAlive: true,
-        },
-        cache: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const useLocalDb = configService.get<string>('USE_LOCAL_DB') === 'true';
+        if (useLocalDb) {
+          return {
+            type: 'sqlite',
+            database: 'csw_db.sqlite',
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            synchronize: true,
+          };
+        }
+        return {
+          type: 'postgres',
+          url: configService.get<string>('DATABASE_URL'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize:
+            configService.get<string>('DB_SYNCHRONIZE') === 'true' ||
+            configService.get<boolean>('DB_SYNCHRONIZE') === true,
+          ssl: {
+            rejectUnauthorized: false,
+          },
+          extra: {
+            max: 25,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 5000,
+            keepAlive: true,
+          },
+          cache: true,
+        };
+      },
       inject: [ConfigService],
     }),
     UsersModule,

@@ -36,8 +36,18 @@ export class CategoryService {
       photoUrl = this.mediaService.getUploadUrl(file.filename, req);
     }
 
+    const slug =
+      createCategoryDto.slug ||
+      createCategoryDto.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '') +
+        '-' +
+        Date.now();
+
     const category = this.categoryRepository.create({
       ...createCategoryDto,
+      slug,
       photo: photoUrl,
     });
     return this.categoryRepository.save(category);
@@ -102,5 +112,10 @@ export class CategoryService {
   async remove(id: number): Promise<void> {
     const category = await this.findOne(id);
     await this.categoryRepository.remove(category);
+  }
+
+  async restore(id: number): Promise<Category> {
+    await this.categoryRepository.restore(id);
+    return this.findOne(id);
   }
 }

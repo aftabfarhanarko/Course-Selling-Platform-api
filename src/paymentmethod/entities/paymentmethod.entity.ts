@@ -29,13 +29,13 @@ export class PaymentMethod {
   id: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: PaymentMethodType,
   })
   type: PaymentMethodType;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: PaymentMethodStatus,
     default: PaymentMethodStatus.PENDING,
   })

@@ -27,10 +27,20 @@ export class CourseService {
       thumbnailUrl = this.mediaService.getUploadUrl(file.filename, req);
     }
 
-    const { categoryId, instructorId, ...rest } = createCourseDto;
+    const { categoryId, instructorId, slug: customSlug, ...rest } = createCourseDto;
+
+    const slug =
+      customSlug ||
+      createCourseDto.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '') +
+        '-' +
+        Date.now();
 
     const course = this.courseRepository.create({
       ...rest,
+      slug,
       category: categoryId ? ({ id: categoryId } as any) : undefined,
       instructor: instructorId ? ({ id: instructorId } as any) : undefined,
       thumbnail: thumbnailUrl,

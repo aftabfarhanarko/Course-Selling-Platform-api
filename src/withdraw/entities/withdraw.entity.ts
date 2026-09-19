@@ -45,7 +45,7 @@ export class Withdraw {
   studentAmount: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: WithdrawStatus,
     default: WithdrawStatus.PENDING,
   })
