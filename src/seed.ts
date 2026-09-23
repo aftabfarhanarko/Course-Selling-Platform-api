@@ -14,20 +14,44 @@ async function seed() {
 
   console.log('--- Starting Database Seeding ---');
 
-  // 1. Seed Super Admin User if not present
-  try {
-    const existingAdmin = await usersService.findByEmail('admin@edunova.com');
-    if (!existingAdmin) {
-      await usersService.create({
-        name: 'Super Admin',
-        email: 'admin@edunova.com',
-        password: 'Admin@123456',
-        role: UserRole.ADMIN,
-      } as any);
-      console.log('Created Super Admin: admin@edunova.com / Admin@123456');
+  // 1. Seed Demo Users for all roles if not present
+  const demoUsers = [
+    {
+      name: 'Super Admin',
+      email: 'admin@edunova.com',
+      password: 'Admin@123456',
+      role: UserRole.ADMIN,
+    },
+    {
+      name: 'Demo Instructor',
+      email: 'instructor@edunova.com',
+      password: 'Instructor@123456',
+      role: UserRole.INSTRUCTOR,
+    },
+    {
+      name: 'Demo Student',
+      email: 'student@edunova.com',
+      password: 'Student@123456',
+      role: UserRole.STUDENT,
+    },
+    {
+      name: 'Demo Affiliate',
+      email: 'affiliate@edunova.com',
+      password: 'Affiliate@123456',
+      role: UserRole.AFFILIATE,
+    },
+  ];
+
+  for (const user of demoUsers) {
+    try {
+      const existing = await usersService.findByEmail(user.email);
+      if (!existing) {
+        await usersService.create(user as any);
+        console.log(`Created ${user.name}: ${user.email} / ${user.password}`);
+      }
+    } catch (e) {
+      console.log(`User ${user.email} check/seed error:`, e.message);
     }
-  } catch (e) {
-    console.log('Admin user check/seed:', e.message);
   }
 
   // 2. Seed Categories
