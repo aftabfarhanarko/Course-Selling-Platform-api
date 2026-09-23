@@ -46,7 +46,7 @@ export class Enrollment {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   amount: number;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   enrolledAt: Date | null;
 
   @Column({ default: false })

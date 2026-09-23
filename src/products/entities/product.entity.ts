@@ -41,7 +41,7 @@ export class Product {
   @Column({ type: 'varchar', nullable: true })
   approvedByName: string | null;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   approvalDate: Date;
 
   @Column({ type: 'text', nullable: true })
