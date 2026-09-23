@@ -70,7 +70,6 @@ Maruf Tech
 
 Building modern, scalable, and high-performance software solutions for the digital world.
 
-Website: https://www.maruftech.online/
 
 ## 📄 License
 
@@ -78,4 +77,4 @@ MIT License
 
 ---
 
-Developed with ❤️ by Maruf Tech
+Developed with ❤️ by = Aftab Farhan ARKO

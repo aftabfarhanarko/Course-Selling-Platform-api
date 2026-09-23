@@ -48,7 +48,7 @@ async function bootstrap() {
         'https://course-selling-platform-pfny.vercel.app/',
         'https://course-selling-platform-red.vercel.app',
         'https://course-selling-platform-red.vercel.app/',
-        'https://www.maruftech.online',
+        
       ];
       if (!origin || allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
         callback(null, true);
